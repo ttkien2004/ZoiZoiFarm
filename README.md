@@ -31,6 +31,7 @@
       ```bash
       PORT=3000
       DATABASE_URL="mysql://<your_username>:<your_password>@localhost:<your_port>/<your_database_name>?schema=public"
+      SECRET=kientrantrungbksvtrungkientranmsdcdcgodskgodaskfodkaojjdfj
 ### Lưu ý:
 1. Nếu như trong mysql có thay đổi nội dung các table, thì dùng lệnh sau để khởi động lại prisma
      ```bash
