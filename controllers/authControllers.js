@@ -6,7 +6,7 @@ const createToken = () => {
 	return "Hello token";
 };
 const loginUser = async (req, res) => {
-	res.status(200).json({ msg: "Hello wrold" });
+	res.status(200).json({ msg: "Hello wrold!" });
 };
 
 const signupUser = async () => {
