@@ -30,7 +30,7 @@
    2. Thêm nội dung sau vào file `.env`
       ```bash
       PORT=3000
-      DATABASE_URL="mysql://root:12345@localhost:5432/IrrigationSystem?schema=public"
+      DATABASE_URL="mysql://<your_username>:<your_password>@localhost:<your_port>/<your_database_name>?schema=public"
 ### Lưu ý:
 1. Nếu như trong mysql có thay đổi nội dung các table, thì dùng lệnh sau để khởi động lại prisma
      ```bash
