@@ -10,7 +10,11 @@ app.use(express.json());
 // For authentication
 app.use("/api/auth", authRoutes);
 // For services
-const port = process.env.PORT | 3000;
-app.listen(port, () => {
-	console.log("Listening to port 3000");
+app.use("/", (req, res) => {
+	res.status(200).json({ msg: "Hello world" });
+});
+// const port = process.env.PORT | 3000;
+// Connect to database
+app.listen(process.env.PORT, () => {
+	console.log(`Listening to port ${process.env.PORT}`);
 });
