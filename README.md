@@ -15,7 +15,7 @@
 
 ## ⚙️ Cài đặt
 
-### Requirements:
+### Yêu cầu:
 - Node.js >= 20.x
 - NPM >= 7.x or Yarn
 - MySQL server
@@ -25,3 +25,15 @@
    1. npm i or npm install (Nếu bạn sử dụng npm)
    2. yarn add (Nếu bạn sử dụng yarn)
    3. Chạy thử chương trình: npm run start:dev
+3. Thay đổi nội dung file env
+   1. Thêm file `.env` vào thư mục chính
+   2. Thêm nội dung sau vào file `.env`
+      ```bash
+      PORT=3000
+      DATABASE_URL="mysql://root:12345@localhost:5432/IrrigationSystem?schema=public"
+### Lưu ý:
+1. Nếu như trong mysql có thay đổi nội dung các table, thì dùng lệnh sau để khởi động lại prisma
+     ```bash
+     npx prisma db pull
+     npx prisma generate
+2. Tài liệu về prisma: [https://www.prisma.io/docs/orm/prisma-client]
