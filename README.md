@@ -56,3 +56,4 @@
    npx prisma generate
    ```
 2. Tài liệu về prisma: [https://www.prisma.io/docs/orm/prisma-client]
+3. Swagger UI: http://localhost:3000/api-docs

@@ -5,6 +5,12 @@ const swaggerJsdoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
 const app = express();
 const routes = require("./routes");
+const authRoutes = require("./routes/authRoutes");
+const pumpRoutes = require('./routes/pumpRoutes');
+const lightRoutes = require('./routes/lightRoutes');
+
+// const swaggerSpec = swaggerJsdoc(swaggerOptions);
+// app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use(cors());
 app.use(express.json());
@@ -42,7 +48,16 @@ app.use(
 	swaggerUi.setup(swaggerDocs, { explorer: true })
 );
 
-// Nothing
+// For authentication
+app.use("/api/auth", authRoutes);
+
+// For controlPump
+app.use('/api/pump', pumpRoutes);
+
+// For controlLight
+app.use('/api/light', lightRoutes);
+
+
 app.use("/", (req, res) => {
 	res.status(200).json({ msg: "Hello world" });
 });
@@ -53,3 +68,5 @@ app.listen(process.env.PORT, () => {
 	console.log(`Listening to port ${process.env.PORT}`);
 	// console.log(JSON.stringify(swaggerDocs, null, 2));
 });
+
+

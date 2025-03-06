@@ -8,12 +8,12 @@ datasource db {
 }
 
 model controls {
+  controlID  Int      @id @default(autoincrement())
   userID     Int
   deviceID   Int
   timeSwitch DateTime @db.DateTime(0)
   action     String   @db.VarChar(50)
 
-  @@id([userID, deviceID])
   @@index([deviceID], map: "deviceID")
 }
 
@@ -31,24 +31,22 @@ model device {
   deviceName String        @db.VarChar(50)
   quantity   Int?
   status     device_status
+  led_light  led_light?
+  pump       pump?
 }
 
 model led_light {
-  lightID  Int             @id @default(autoincrement())
-  deviceID Int
-  state    led_light_state
-
-  @@index([deviceID], map: "deviceID")
+  lightID Int             @id
+  state   led_light_state
+  device  device          @relation(fields: [lightID], references: [deviceID], onDelete: Cascade, onUpdate: NoAction, map: "led_light_ibfk_1")
 }
 
 model pump {
-  pumpID    Int        @id @default(autoincrement())
-  deviceID  Int
+  pumpID    Int        @id
   autoLevel Boolean
   schedule  String?    @db.VarChar(255)
   state     pump_state
-
-  @@index([deviceID], map: "deviceID")
+  device    device     @relation(fields: [pumpID], references: [deviceID], onDelete: Cascade, onUpdate: NoAction, map: "pump_ibfk_1")
 }
 
 model sensor {
