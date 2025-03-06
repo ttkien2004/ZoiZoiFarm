@@ -6,11 +6,11 @@ const createToken = () => {
 	return "Hello token";
 };
 const loginUser = async (req, res) => {
-	res.status(200).json({ msg: "Hello wrold" });
+	res.status(201).json({ msg: "Hello login" });
 };
 
-const signupUser = async () => {
-	res.status(200).json({ msg: "Hello signup" });
+const signupUser = async (req, res) => {
+	res.status(201).json({ msg: "Hello signup" });
 };
 
 module.exports = {
