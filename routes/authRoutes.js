@@ -1,7 +1,7 @@
 const express = require("express");
 const { loginUser, signupUser } = require("../controllers/authControllers");
 
-const route = express.Router();
+const router = express.Router();
 
 /**
  * @swagger
@@ -63,7 +63,7 @@ const route = express.Router();
  *         description: Invalid input data
  */
 
-route.post("/signup", signupUser);
-route.post("/login", loginUser);
+router.post("/signup", signupUser);
+router.post("/login", loginUser);
 
-module.exports = route;
+module.exports = router;

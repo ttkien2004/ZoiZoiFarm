@@ -4,11 +4,13 @@ const cors = require("cors");
 const swaggerJsdoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
 const app = express();
-const authRoutes = require("./routes/authRoutes");
+const routes = require("./routes");
 
 app.use(cors());
 app.use(express.json());
 
+// All APIs needed
+app.use(routes);
 // Swagger configuration
 const swaggerOptions = {
 	definition: {
@@ -39,9 +41,8 @@ app.use(
 	swaggerUi.serve,
 	swaggerUi.setup(swaggerDocs, { explorer: true })
 );
-// For authentication
-app.use("/api/auth", authRoutes);
-// For services
+
+// Nothing
 app.use("/", (req, res) => {
 	res.status(200).json({ msg: "Hello world" });
 });
