@@ -14,10 +14,10 @@ model controls {
   sensorID   Int?
   timeSwitch DateTime @db.DateTime(0)
   action     String   @db.VarChar(200)
-  device     device?  @relation(fields: [deviceID], references: [deviceID], onDelete: Cascade, onUpdate: NoAction, map: "controls_ibfk_device")
-  sensor     sensor?  @relation(fields: [sensorID], references: [sensorID], onDelete: Cascade, onUpdate: NoAction, map: "controls_ibfk_sensor")
+  device     device?  @relation(fields: [deviceID], references: [deviceID], onDelete: SetNull, onUpdate: NoAction, map: "controls_ibfk_device")
+  sensor     sensor?  @relation(fields: [sensorID], references: [sensorID], onDelete: SetNull, onUpdate: NoAction, map: "controls_ibfk_sensor")
 
-@@index([controlID], map: "controlID")
+  @@index([controlID], map: "controlID")
 }
 
 model data {

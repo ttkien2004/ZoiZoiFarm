@@ -45,7 +45,7 @@ exports.addLight = async (req, res) => {
         userID, // Lưu user thực hiện thao tác
         deviceID: newDevice.deviceID,
         timeSwitch: new Date(),
-        action: `Thêm ${deviceName} thành công.`,
+        action: `Thêm ${deviceName} thành công!`,
       },
     });
 
