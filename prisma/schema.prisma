@@ -8,16 +8,16 @@ datasource db {
 }
 
 model controls {
-  userID     Int
-  deviceID   Int
-  timeSwitch DateTime @db.DateTime(0)
-  action     String   @db.VarChar(50)
   controlID  Int      @id @default(autoincrement())
+  userID     Int
+  deviceID   Int?
   sensorID   Int?
-  sensor     sensor?  @relation(fields: [sensorID], references: [sensorID], onDelete: Cascade, onUpdate: NoAction, map: "controls_ibfk_1")
+  timeSwitch DateTime @db.DateTime(0)
+  action     String   @db.VarChar(200)
+  device     device?  @relation(fields: [deviceID], references: [deviceID], onDelete: Cascade, onUpdate: NoAction, map: "controls_ibfk_device")
+  sensor     sensor?  @relation(fields: [sensorID], references: [sensorID], onDelete: Cascade, onUpdate: NoAction, map: "controls_ibfk_sensor")
 
-  @@index([deviceID], map: "deviceID")
-  @@index([sensorID], map: "sensorID")
+@@index([controlID], map: "controlID")
 }
 
 model data {
@@ -36,6 +36,8 @@ model device {
   status     device_status
   led_light  led_light?
   pump       pump?
+
+  controls controls[]
 }
 
 model led_light {

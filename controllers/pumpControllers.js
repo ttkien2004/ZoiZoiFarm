@@ -1,48 +1,13 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-
-//Switch pump
-exports.togglePumpState = async (req, res) => {
-  const pumpID = parseInt(req.params.pumpID);
-  const { state, userID } = req.body;
+// Add Pump and Log to Controls
+exports.addPump = async (req, res) => {
+  const { deviceName, status, autoLevel, schedule, state, userID } = req.body;
 
   if (!userID) {
-    return res.status(400).json({ message: 'Yêu cầu phải cung cấp userID!' });
+    return res.status(400).json({ message: "Yêu cầu phải cung cấp userID!" });
   }
-
-  if (!['on', 'off', 'auto'].includes(state)) {
-    return res.status(400).json({ message: 'Trạng thái không hợp lệ!' });
-  }
-
-  try {
-    const updatedPump = await prisma.pump.update({
-      where: { pumpID },
-      data: { state },
-    });
-
-    await prisma.controls.create({
-      data: {
-        userID,
-        deviceID: pumpID,
-        timeSwitch: new Date(),
-        action: `Set state to ${state}`,
-      }
-    });
-
-    res.status(201).json({
-      message: 'Đã cập nhật trạng thái máy bơm thành công!',
-      pump: updatedPump,
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Lỗi khi cập nhật trạng thái máy bơm.' });
-  }
-};
-
-//add pump
-exports.addPump = async (req, res) => {
-  const { deviceName, status, autoLevel, schedule, state } = req.body;
 
   try {
     // Tạo thiết bị mới với số lượng mặc định là 1
@@ -77,6 +42,16 @@ exports.addPump = async (req, res) => {
       data: { quantity: totalPumps },
     });
 
+    // Ghi log vào bảng `controls`
+    await prisma.controls.create({
+      data: {
+        userID,
+        deviceID: newDevice.deviceID,
+        timeSwitch: new Date(),
+        action: `Thêm ${deviceName} vào hệ thống`,
+      },
+    });
+
     res.status(201).json({
       message: "Thêm máy bơm mới thành công!",
       pump: newPump,
@@ -89,15 +64,71 @@ exports.addPump = async (req, res) => {
   }
 };
 
-//Set pump scheduleschedule
+// Switch Pump State and Log to Controls
+exports.togglePumpState = async (req, res) => {
+  const pumpID = parseInt(req.params.pumpID);
+  const { state, userID } = req.body;
+
+  if (!userID) {
+    return res.status(400).json({ message: 'Yêu cầu phải cung cấp userID!' });
+  }
+
+  if (!['on', 'off', 'auto'].includes(state)) {
+    return res.status(400).json({ message: 'Trạng thái không hợp lệ!' });
+  }
+
+  try {
+    // Lấy thông tin máy bơm và tên thiết bị
+    const pump = await prisma.pump.findUnique({
+      where: { pumpID },
+      include: { device: true }, // Lấy cả thông tin thiết bị
+    });
+
+    if (!pump) {
+      return res.status(404).json({ message: 'Máy bơm không tồn tại!' });
+    }
+
+    // Cập nhật trạng thái của máy bơm
+    const updatedPump = await prisma.pump.update({
+      where: { pumpID },
+      data: { state },
+    });
+
+    // Ghi log vào bảng `controls`
+    await prisma.controls.create({
+      data: {
+        userID,
+        deviceID: pumpID,
+        timeSwitch: new Date(),
+        action: `Điều chỉnh ${pump.device.deviceName} thành ${state}`,
+      },
+    });
+
+    res.status(200).json({
+      message: 'Đã cập nhật trạng thái máy bơm thành công!',
+      pump: updatedPump,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Lỗi khi cập nhật trạng thái máy bơm.', error: error.message });
+  }
+};
+
+
+//Set pump schedule
 exports.setPumpSchedule = async (req, res) => {
   try {
       const { pumpID } = req.params;
-      const { schedule, autoLevel } = req.body;
+      const { schedule, autoLevel, userID } = req.body;
+
+      if (!userID) {
+          return res.status(400).json({ message: 'Yêu cầu phải cung cấp userID!' });
+      }
 
       // Kiểm tra xem máy bơm có tồn tại không
       const pump = await prisma.pump.findUnique({
           where: { pumpID: parseInt(pumpID) },
+          include: { device: true } // Lấy thông tin thiết bị liên quan
       });
 
       if (!pump) {
@@ -111,6 +142,16 @@ exports.setPumpSchedule = async (req, res) => {
               schedule: schedule || pump.schedule, // Nếu không có giá trị mới, giữ nguyên
               autoLevel: autoLevel !== undefined ? autoLevel : pump.autoLevel,
           },
+      });
+
+      // Ghi log vào bảng controls
+      await prisma.controls.create({
+          data: {
+              userID,
+              deviceID: pump.device.deviceID,
+              timeSwitch: new Date(),
+              action: `${pump.device.deviceName} tự động tưới nước lúc ${schedule}`,
+          }
       });
 
       return res.status(200).json({ message: 'Cập nhật lịch trình tưới tiêu thành công', pump: updatedPump });

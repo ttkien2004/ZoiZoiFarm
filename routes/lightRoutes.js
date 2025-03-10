@@ -1,7 +1,46 @@
 const express = require('express');
 const { toggleLedState, addLight, getLightStatus } = require('../controllers/lightControllers');
-
 const router = express.Router();
+
+/**
+ * @swagger
+ * /api/light:
+ *   post:
+ *     summary: Add a new LED light
+ *     description: Add a new LED light device into the system and log the action in controls.
+ *     tags: ["Light"]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [deviceName, status, state, userID]
+ *             properties:
+ *               deviceName:
+ *                 type: string
+ *                 example: "Đèn LED số 1"
+ *               status:
+ *                 type: string
+ *                 enum: [able, disable]
+ *                 example: "able"
+ *               state:
+ *                 type: string
+ *                 enum: [on, off]
+ *                 example: "off"
+ *               userID:
+ *                 type: integer
+ *                 example: 1
+ *     responses:
+ *       201:
+ *         description: Successfully added LED light and logged in controls.
+ *       400:
+ *         description: Missing required fields.
+ *       500:
+ *         description: Internal server error.
+ */
+
+router.post("/", addLight);
 
 /**
  * @swagger
@@ -57,55 +96,6 @@ const router = express.Router();
  *         description: Internal server error
  */
 router.put('/:lightID/state', toggleLedState);
-
-
-/**
- * @swagger
- * /api/light:
- *   post:
- *     summary: Add a new LED light
- *     description: Add a new LED light device into the system with a default quantity of 1.
- *     tags: ["Light"]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               deviceName:
- *                 type: string
- *                 example: "Đèn LED số 1"
- *               status:
- *                 type: string
- *                 enum: [able, disable]
- *                 example: "able"
- *               state:
- *                 type: string
- *                 enum: [on, off]
- *                 example: "off"
- *     responses:
- *       201:
- *         description: Successfully added LED light
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Thêm đèn LED mới thành công!"
- *                 led:
- *                   type: object
- *                 totalLeds:
- *                   type: integer
- *                   example: 10
- *       500:
- *         description: Internal server error
- */
-
-// Định nghĩa route POST cho việc thêm đèn LED
-router.post("/", addLight);
 
 /**
  * @swagger

@@ -1,53 +1,19 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-//Light Control
-exports.toggleLedState = async (req, res) => {
-  const lightID = parseInt(req.params.lightID);
-  const { state, userID } = req.body;
+// Add a light
+exports.addLight = async (req, res) => {
+  const { deviceName, status, state, userID } = req.body; // Lấy thêm userID từ request
 
   if (!userID) {
-    return res.status(400).json({ message: 'Yêu cầu phải cung cấp userID!' });
-  }
-  if (!['on', 'off'].includes(state)) {
-    return res.status(400).json({ message: 'Trạng thái không hợp lệ!' });
+    return res.status(400).json({ message: "Yêu cầu phải có userID!" });
   }
 
   try {
-    const updatedLed = await prisma.led_light.update({
-      where: { lightID },
-      data: { state },
-    });
-
-    await prisma.controls.create({
-      data: {
-        userID,
-        deviceID: lightID, 
-        timeSwitch: new Date(),
-        action: `Set LED state to ${state}`,
-      }
-    });
-
-    res.status(200).json({
-      message: 'Đã cập nhật trạng thái đèn LED thành công!',
-      led: updatedLed,
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Lỗi khi cập nhật trạng thái đèn LED.' });
-  }
-};
-
-// add light
-exports.addLight = async (req, res) => {
-  const { deviceName, status, state } = req.body;
-
-  try {
-    // Tạo thiết bị mới với số lượng mặc định là 1
     const newDevice = await prisma.device.create({
       data: {
         deviceName,
-        quantity: 1, // Mặc định là 1
+        quantity: 1,
         status,
       },
     });
@@ -73,6 +39,16 @@ exports.addLight = async (req, res) => {
       data: { quantity: totalLeds },
     });
 
+    // 🌟 **Ghi vào bảng CONTROLS**
+    await prisma.controls.create({
+      data: {
+        userID, // Lưu user thực hiện thao tác
+        deviceID: newDevice.deviceID,
+        timeSwitch: new Date(),
+        action: `Thêm ${deviceName} thành công.`,
+      },
+    });
+
     res.status(201).json({
       message: "Thêm đèn LED mới thành công!",
       led: newLed,
@@ -85,6 +61,53 @@ exports.addLight = async (req, res) => {
   }
 };
 
+//Light Control
+exports.toggleLedState = async (req, res) => {
+  const lightID = parseInt(req.params.lightID);
+  const { state, userID } = req.body;
+
+  if (!userID) {
+    return res.status(400).json({ message: 'Yêu cầu phải cung cấp userID!' });
+  }
+  if (!['on', 'off'].includes(state)) {
+    return res.status(400).json({ message: 'Trạng thái không hợp lệ!' });
+  }
+
+  try {
+    // Lấy thông tin đèn LED (lightID chính là deviceID)
+    const lightDevice = await prisma.device.findUnique({
+      where: { deviceID: lightID },
+      select: { deviceName: true }, // Lấy tên thiết bị
+    });
+
+    if (!lightDevice) {
+      return res.status(404).json({ message: "Không tìm thấy đèn LED!" });
+    }
+
+    const updatedLed = await prisma.led_light.update({
+      where: { lightID },
+      data: { state },
+    });
+
+    await prisma.controls.create({
+      data: {
+        userID,
+        deviceID: lightID, 
+        timeSwitch: new Date(),
+        action: `Điều chỉnh ${lightDevice.deviceName} thành ${state}`,
+      }
+    });
+
+    res.status(200).json({
+      message: 'Đã cập nhật trạng thái đèn LED thành công!',
+      led: updatedLed,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Lỗi khi cập nhật trạng thái đèn LED.' });
+  }
+};
+
 //Get light status
 exports.getLightStatus = async (req, res) => {
   try {
@@ -93,7 +116,7 @@ exports.getLightStatus = async (req, res) => {
       // Tìm đèn LED theo ID
       const light = await prisma.led_light.findUnique({
           where: { lightID: parseInt(lightID) },
-          include: { device: true }, // Lấy thông tin thiết bị liên quan
+          include: { device: true },
       });
 
       if (!light) {

@@ -29,11 +29,14 @@ const router = express.Router();
  *                 example: true
  *               schedule:
  *                 type: string
- *                 example: "06:00,18:00"
+ *                 example: "06:00, 18:00"
  *               state:
  *                 type: string
  *                 enum: [on, off, auto]
  *                 example: "auto"
+ *               userID:
+ *                 type: integer
+ *                 example: 1
  *     responses:
  *       201:
  *         description: Successfully added pump

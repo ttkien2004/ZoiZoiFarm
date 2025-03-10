@@ -43,6 +43,9 @@ router.get('/', getAllDevices);
  *                 type: string
  *                 enum: [able, disable]
  *                 example: "disable"
+ *               userID:
+ *                 type: integer
+ *                 example: 1
  *     responses:
  *       200:
  *         description: Cập nhật thành công
@@ -58,7 +61,7 @@ router.put("/:deviceID/status", updateDeviceStatus);
  * /api/device/{deviceID}:
  *   delete:
  *     summary: Delete device
- *     description: theo `deviceID` và cập nhật `quantity` của tất cả thiết bị cùng loại.
+ *     description: Xóa thiết bị theo `deviceID` và cập nhật `quantity` của tất cả thiết bị cùng loại.
  *     tags: ["Device"]
  *     parameters:
  *       - in: path
@@ -67,6 +70,17 @@ router.put("/:deviceID/status", updateDeviceStatus);
  *         schema:
  *           type: integer
  *         description: ID của thiết bị cần xóa
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [userID]
+ *             properties:
+ *               userID:
+ *                 type: integer
+ *                 example: 1
  *     responses:
  *       200:
  *         description: Xóa thiết bị thành công và cập nhật số lượng
@@ -75,6 +89,7 @@ router.put("/:deviceID/status", updateDeviceStatus);
  *       500:
  *         description: Lỗi server
  */
+
 router.delete("/:deviceID", deleteDevice);
 
 
