@@ -1,5 +1,5 @@
 const express = require('express');
-const { toggleLedState, addLight } = require('../controllers/lightControllers');
+const { toggleLedState, addLight, getLightStatus } = require('../controllers/lightControllers');
 
 const router = express.Router();
 
@@ -58,12 +58,13 @@ const router = express.Router();
  */
 router.put('/:lightID/state', toggleLedState);
 
+
 /**
  * @swagger
  * /api/light:
  *   post:
- *     summary: Add new LED light
- *     description: Add a new LED light device into the system.
+ *     summary: Add a new LED light
+ *     description: Add a new LED light device into the system with a default quantity of 1.
  *     tags: ["Light"]
  *     requestBody:
  *       required: true
@@ -71,14 +72,10 @@ router.put('/:lightID/state', toggleLedState);
  *         application/json:
  *           schema:
  *             type: object
- *             required: [deviceName, quantity, status, state]
  *             properties:
  *               deviceName:
  *                 type: string
- *                 example: "Đèn LED Số 1"
- *               quantity:
- *                 type: integer
- *                 example: 5
+ *                 example: "Đèn LED số 1"
  *               status:
  *                 type: string
  *                 enum: [able, disable]
@@ -100,17 +97,38 @@ router.put('/:lightID/state', toggleLedState);
  *                   example: "Thêm đèn LED mới thành công!"
  *                 led:
  *                   type: object
- *                   properties:
- *                     lightID:
- *                       type: integer
- *                     state:
- *                       type: string
- *                       example: "off"
- *       400:
- *         description: Invalid input data
+ *                 totalLeds:
+ *                   type: integer
+ *                   example: 10
  *       500:
  *         description: Internal server error
  */
+
+// Định nghĩa route POST cho việc thêm đèn LED
 router.post("/", addLight);
+
+/**
+ * @swagger
+ * /api/light/{lightID}/status:
+ *   get:
+ *     summary: Get current LED light status
+ *     description: Retrieve the current state of an LED light.
+ *     tags: ["Light"]
+ *     parameters:
+ *       - in: path
+ *         name: lightID
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID of the LED light to retrieve status
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved LED light status
+ *       404:
+ *         description: LED light not found
+ *       500:
+ *         description: Internal server error
+ */
+router.get('/:lightID/status', getLightStatus);
 
 module.exports = router;

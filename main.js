@@ -8,6 +8,8 @@ const routes = require("./routes");
 const authRoutes = require("./routes/authRoutes");
 const pumpRoutes = require('./routes/pumpRoutes');
 const lightRoutes = require('./routes/lightRoutes');
+const deviceRoutes = require('./routes/deviceRoutes');
+const sensorRoutes = require('./routes/sensorRoutes');
 
 // const swaggerSpec = swaggerJsdoc(swaggerOptions);
 // app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
@@ -57,6 +59,11 @@ app.use('/api/pump', pumpRoutes);
 // For controlLight
 app.use('/api/light', lightRoutes);
 
+// For device
+app.use('/api/device', deviceRoutes);
+
+// For sensor
+app.use('/api/sensor', sensorRoutes);
 
 app.use("/", (req, res) => {
 	res.status(200).json({ msg: "Hello world" });
