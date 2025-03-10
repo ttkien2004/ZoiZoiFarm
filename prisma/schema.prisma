@@ -8,13 +8,16 @@ datasource db {
 }
 
 model controls {
-  controlID  Int      @id @default(autoincrement())
   userID     Int
   deviceID   Int
   timeSwitch DateTime @db.DateTime(0)
   action     String   @db.VarChar(50)
+  controlID  Int      @id @default(autoincrement())
+  sensorID   Int?
+  sensor     sensor?  @relation(fields: [sensorID], references: [sensorID], onDelete: Cascade, onUpdate: NoAction, map: "controls_ibfk_1")
 
   @@index([deviceID], map: "deviceID")
+  @@index([sensorID], map: "sensorID")
 }
 
 model data {
@@ -56,6 +59,7 @@ model sensor {
   quantity       Int?
   alertThreshold Float?        @db.Float
   status         sensor_status
+  controls       controls[]
 }
 
 model user {
