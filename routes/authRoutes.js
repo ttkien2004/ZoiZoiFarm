@@ -5,14 +5,11 @@ const router = express.Router();
 
 /**
  * @swagger
- * tags:
- *   - name: "Authentication"
- *     description: "Endpoints related to user authentication"
- *
  * /api/auth/signup:
  *   post:
  *     summary: Register a new user
  *     description: Create a new user account with the provided details.
+ *     tags: ["Authentication"]
  *     requestBody:
  *       required: true
  *       content:
@@ -35,14 +32,11 @@ const router = express.Router();
 
 /**
  * @swagger
- *  tags:
- *   - name: "Authentication"
- *     description: "Endpoints related to user authentication"
- *
  * /api/auth/login:
  *   post:
  *     summary: Login to page
  *     description: Create a new user account with the provided details.
+ *     tags: ["Authentication"]
  *     requestBody:
  *       required: true
  *       content:
