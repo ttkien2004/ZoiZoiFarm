@@ -8,16 +8,20 @@ datasource db {
 }
 
 model controls {
-  controlID  Int      @id @default(autoincrement())
-  userID     Int
+  userID     Int?
   deviceID   Int?
-  sensorID   Int?
   timeSwitch DateTime @db.DateTime(0)
   action     String   @db.VarChar(200)
-  device     device?  @relation(fields: [deviceID], references: [deviceID], onDelete: SetNull, onUpdate: NoAction, map: "controls_ibfk_device")
-  sensor     sensor?  @relation(fields: [sensorID], references: [sensorID], onDelete: SetNull, onUpdate: NoAction, map: "controls_ibfk_sensor")
+  controlID  Int      @id @default(autoincrement())
+  sensorID   Int?
+  user       user?    @relation(fields: [userID], references: [userID], onUpdate: NoAction, map: "controls_ibfk_1")
+  device     device?  @relation(fields: [deviceID], references: [deviceID], onUpdate: NoAction, map: "controls_ibfk_device")
+  sensor     sensor?  @relation(fields: [sensorID], references: [sensorID], onUpdate: NoAction, map: "controls_ibfk_sensor")
 
   @@index([controlID], map: "controlID")
+  @@index([deviceID], map: "controls_ibfk_device")
+  @@index([sensorID], map: "controls_ibfk_sensor")
+  @@index([userID], map: "userID")
 }
 
 model data {
@@ -34,10 +38,13 @@ model device {
   deviceName String        @db.VarChar(50)
   quantity   Int?
   status     device_status
+  userID     Int?
+  controls   controls[]
+  user       user?         @relation(fields: [userID], references: [userID], onUpdate: NoAction, map: "device_ibfk_1")
   led_light  led_light?
   pump       pump?
 
-  controls controls[]
+  @@index([userID], map: "userID")
 }
 
 model led_light {
@@ -61,17 +68,24 @@ model sensor {
   quantity       Int?
   alertThreshold Float?        @db.Float
   status         sensor_status
+  userID         Int?
   controls       controls[]
+  user           user?         @relation(fields: [userID], references: [userID], onUpdate: NoAction, map: "sensor_ibfk_1")
+
+  @@index([userID], map: "userID")
 }
 
 model user {
-  userID    Int     @id @default(autoincrement())
-  userName  String  @unique(map: "userName") @db.VarChar(50)
-  password  String  @db.VarChar(255)
-  firstName String? @db.VarChar(50)
-  lastName  String? @db.VarChar(50)
-  phoneNum  String? @unique(map: "phoneNum") @db.VarChar(15)
-  email     String? @unique(map: "email") @db.VarChar(100)
+  userID    Int        @id @default(autoincrement())
+  userName  String     @unique(map: "userName") @db.VarChar(50)
+  password  String     @db.VarChar(255)
+  firstName String?    @db.VarChar(50)
+  lastName  String?    @db.VarChar(50)
+  phoneNum  String?    @unique(map: "phoneNum") @db.VarChar(15)
+  email     String?    @unique(map: "email") @db.VarChar(100)
+  controls  controls[]
+  device    device[]
+  sensor    sensor[]
 }
 
 model warning {
