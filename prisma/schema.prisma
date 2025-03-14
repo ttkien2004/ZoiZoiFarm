@@ -10,11 +10,14 @@ datasource db {
 model controls {
   controlID  Int      @id @default(autoincrement())
   userID     Int
-  deviceID   Int
+  deviceID   Int?
+  sensorID   Int?
   timeSwitch DateTime @db.DateTime(0)
-  action     String   @db.VarChar(50)
+  action     String   @db.VarChar(200)
+  device     device?  @relation(fields: [deviceID], references: [deviceID], onDelete: SetNull, onUpdate: NoAction, map: "controls_ibfk_device")
+  sensor     sensor?  @relation(fields: [sensorID], references: [sensorID], onDelete: SetNull, onUpdate: NoAction, map: "controls_ibfk_sensor")
 
-  @@index([deviceID], map: "deviceID")
+  @@index([controlID], map: "controlID")
 }
 
 model data {
@@ -33,6 +36,8 @@ model device {
   status     device_status
   led_light  led_light?
   pump       pump?
+
+  controls controls[]
 }
 
 model led_light {
@@ -56,6 +61,7 @@ model sensor {
   quantity       Int?
   alertThreshold Float?        @db.Float
   status         sensor_status
+  controls       controls[]
 }
 
 model user {
