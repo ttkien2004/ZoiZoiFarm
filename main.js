@@ -6,10 +6,10 @@ const swaggerUi = require("swagger-ui-express");
 const app = express();
 const routes = require("./routes");
 const authRoutes = require("./routes/authRoutes");
-const pumpRoutes = require('./routes/pumpRoutes');
-const lightRoutes = require('./routes/lightRoutes');
-const deviceRoutes = require('./routes/deviceRoutes');
-const sensorRoutes = require('./routes/sensorRoutes');
+const pumpRoutes = require("./routes/pumpRoutes");
+const lightRoutes = require("./routes/lightRoutes");
+const deviceRoutes = require("./routes/deviceRoutes");
+const sensorRoutes = require("./routes/sensorRoutes");
 
 // const swaggerSpec = swaggerJsdoc(swaggerOptions);
 // app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
@@ -18,7 +18,7 @@ app.use(cors());
 app.use(express.json());
 
 // All APIs needed
-app.use(routes);
+// app.use(routes);
 // Swagger configuration
 const swaggerOptions = {
 	definition: {
@@ -54,16 +54,16 @@ app.use(
 app.use("/api/auth", authRoutes);
 
 // For controlPump
-app.use('/api/pump', pumpRoutes);
+app.use("/api/pump", pumpRoutes);
 
 // For controlLight
-app.use('/api/light', lightRoutes);
+app.use("/api/light", lightRoutes);
 
 // For device
-app.use('/api/device', deviceRoutes);
+app.use("/api/device", deviceRoutes);
 
 // For sensor
-app.use('/api/sensor', sensorRoutes);
+app.use("/api/sensor", sensorRoutes);
 
 app.use("/", (req, res) => {
 	res.status(200).json({ msg: "Hello world" });
@@ -75,5 +75,3 @@ app.listen(process.env.PORT, () => {
 	console.log(`Listening to port ${process.env.PORT}`);
 	// console.log(JSON.stringify(swaggerDocs, null, 2));
 });
-
-
