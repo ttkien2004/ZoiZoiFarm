@@ -14,10 +14,10 @@ model controls {
   sensorID   Int?
   timeSwitch DateTime @db.DateTime(0)
   action     String   @db.VarChar(200)
-  device     device?  @relation(fields: [deviceID], references: [deviceID], onDelete: SetNull, onUpdate: NoAction, map: "controls_ibfk_device")
-  sensor     sensor?  @relation(fields: [sensorID], references: [sensorID], onDelete: SetNull, onUpdate: NoAction, map: "controls_ibfk_sensor")
 
   @@index([controlID], map: "controlID")
+  @@index([deviceID], map: "controls_ibfk_device")
+  @@index([sensorID], map: "controls_ibfk_sensor")
 }
 
 model data {
@@ -34,16 +34,11 @@ model device {
   deviceName String        @db.VarChar(50)
   quantity   Int?
   status     device_status
-  led_light  led_light?
-  pump       pump?
-
-  controls controls[]
 }
 
 model led_light {
   lightID Int             @id
   state   led_light_state
-  device  device          @relation(fields: [lightID], references: [deviceID], onDelete: Cascade, onUpdate: NoAction, map: "led_light_ibfk_1")
 }
 
 model pump {
@@ -51,7 +46,6 @@ model pump {
   autoLevel Boolean
   schedule  String?    @db.VarChar(255)
   state     pump_state
-  device    device     @relation(fields: [pumpID], references: [deviceID], onDelete: Cascade, onUpdate: NoAction, map: "pump_ibfk_1")
 }
 
 model sensor {
@@ -61,7 +55,6 @@ model sensor {
   quantity       Int?
   alertThreshold Float?        @db.Float
   status         sensor_status
-  controls       controls[]
 }
 
 model user {
