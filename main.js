@@ -4,7 +4,7 @@ const cors = require("cors");
 const swaggerJsdoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
 const app = express();
-const routes = require("./routes");
+// const routes = require("./routes");
 const authRoutes = require("./routes/authRoutes");
 const pumpRoutes = require("./routes/pumpRoutes");
 const lightRoutes = require("./routes/lightRoutes");
@@ -68,7 +68,6 @@ app.use("/api/sensor", sensorRoutes);
 
 // For warning
 app.use("/api/warning", warningRoutes);
-
 
 app.use("/", (req, res) => {
 	res.status(200).json({ msg: "Hello world" });
