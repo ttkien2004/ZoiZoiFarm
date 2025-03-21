@@ -66,6 +66,9 @@ app.use("/api/device", deviceRoutes);
 // For sensor
 app.use("/api/sensor", sensorRoutes);
 
+// For warning
+app.use("/api/warning", warningRoutes);
+
 app.use("/", (req, res) => {
 	res.status(200).json({ msg: "Hello world" });
 });
