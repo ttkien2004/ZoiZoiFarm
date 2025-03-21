@@ -232,3 +232,21 @@ exports.deleteSensor = async (req, res) => {
       res.status(500).json({ message: "Lỗi khi xóa cảm biến.", error: error.message });
   }
 };
+
+// Controller để lấy dữ liệu cảm biến
+exports.getSensorData = async (req, res) => {
+  try {
+    const sensorData = await prisma.data.findMany({
+      orderBy: { dataTime: 'desc' },
+      take: 100,
+    });
+
+    res.status(200).json({
+      message: 'Lấy dữ liệu cảm biến thành công!',
+      data: sensorData,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Lỗi khi lấy dữ liệu cảm biến.', error: error.message });
+  }
+};

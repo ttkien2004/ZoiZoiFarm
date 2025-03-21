@@ -29,6 +29,7 @@ model data {
   sensorID Int
   dataTime DateTime @db.DateTime(0)
   value    Float    @db.Float
+  sensor   sensor   @relation(fields: [sensorID], references: [sensorID], onDelete: Cascade, onUpdate: NoAction, map: "FK_sensor_id")
 
   @@index([sensorID], map: "sensorID")
 }
@@ -70,7 +71,9 @@ model sensor {
   status         sensor_status
   userID         Int?
   controls       controls[]
+  data           data[]
   user           user?         @relation(fields: [userID], references: [userID], onUpdate: NoAction, map: "sensor_ibfk_1")
+  warning        warning[]
 
   @@index([userID], map: "userID")
 }
@@ -86,6 +89,7 @@ model user {
   controls  controls[]
   device    device[]
   sensor    sensor[]
+  warning   warning[]
 }
 
 model warning {
@@ -93,16 +97,12 @@ model warning {
   sensorID    Int
   message     String   @db.Text
   timeWarning DateTime @db.DateTime(0)
+  userID      Int?
+  sensor      sensor   @relation(fields: [sensorID], references: [sensorID], onDelete: Cascade, onUpdate: NoAction, map: "FK_sensor_warning")
+  user        user?    @relation(fields: [userID], references: [userID], onDelete: Cascade, onUpdate: NoAction, map: "FK_user_warning")
 
   @@index([sensorID], map: "sensorID")
-}
-
-model warning_user {
-  warningID Int
-  userID    Int
-
-  @@id([warningID, userID])
-  @@index([userID], map: "userID")
+  @@index([userID], map: "FK_user_warning")
 }
 
 enum led_light_state {
