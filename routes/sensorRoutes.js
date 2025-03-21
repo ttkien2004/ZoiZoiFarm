@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { addSensor, getSensors, updateSensorStatus, updateAlertThreshold, deleteSensor } = require("../controllers/sensorControllers");
+const { addSensor, getSensors, updateSensorStatus, updateAlertThreshold, deleteSensor , getSensorData} = require("../controllers/sensorControllers");
 
 /**
  * @swagger
@@ -233,6 +233,55 @@ router.put('/:sensorID/alertThreshold', updateAlertThreshold);
  *         description: Lỗi server
  */
 router.delete('/:sensorID', deleteSensor);
-
-
+/**
+ * @swagger
+ * /api/sensor/data:
+ *   get:
+ *     summary: Get data of sensor
+ *     description: Get the newest data of sensor
+ *     tags: ["Sensor"]
+ *     responses:
+ *       200:
+ *         description: Lấy dữ liệu cảm biến thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Lấy dữ liệu cảm biến thành công!"
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       sensorID:
+ *                         type: integer
+ *                         example: 1
+ *                       dataTime:
+ *                         type: string
+ *                         format: date-time
+ *                         example: "2025-03-20T12:30:00Z"
+ *                       value:
+ *                         type: number
+ *                         example: 25.5
+ *                       unit:
+ *                         type: string
+ *                         example: "Celsius"
+ *       500:
+ *         description: Lỗi khi lấy dữ liệu cảm biến
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Lỗi khi lấy dữ liệu cảm biến."
+ *                 error:
+ *                   type: string
+ *                   example: "Database connection failed"
+ */
+router.get('/data', getSensorData);
 module.exports = router;
