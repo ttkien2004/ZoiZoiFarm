@@ -10,7 +10,6 @@ const pumpRoutes = require("./routes/pumpRoutes");
 const lightRoutes = require("./routes/lightRoutes");
 const deviceRoutes = require("./routes/deviceRoutes");
 const sensorRoutes = require("./routes/sensorRoutes");
-const warningRoutes = require("./routes/warningRoutes");
 
 // const swaggerSpec = swaggerJsdoc(swaggerOptions);
 // app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
@@ -66,8 +65,8 @@ app.use("/api/device", deviceRoutes);
 // For sensor
 app.use("/api/sensor", sensorRoutes);
 
-// For warning
-app.use("/api/warning", warningRoutes);
+// // For warning
+// app.use("/api/warning", warningRoutes);
 
 
 app.use("/", (req, res) => {
