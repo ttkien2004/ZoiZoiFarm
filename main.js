@@ -11,7 +11,14 @@ const lightRoutes = require("./routes/lightRoutes");
 const deviceRoutes = require("./routes/deviceRoutes");
 const sensorRoutes = require("./routes/sensorRoutes");
 const warningRoutes = require("./routes/warningRoutes");
-
+// MQTT connect
+const mqtt = require("mqtt");
+const axios = require("axios");
+const client = mqtt.connect(`mqtt://io.adafruit.com`, {
+	username: process.env.AIO_USERNAME,
+	password: process.env.AIO_KEY,
+});
+const axiosClient = require("./axiosConfig/axiosConfig");
 // const swaggerSpec = swaggerJsdoc(swaggerOptions);
 // app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
@@ -69,10 +76,49 @@ app.use("/api/sensor", sensorRoutes);
 // For warning
 app.use("/api/warning", warningRoutes);
 
+// Connect to adafruit
+client.on("connect", () => {
+	console.log("Connect successful");
+	client.subscribe(
+		`${process.env.AIO_USERNAME}/feeds/${process.env.FEED_NAME}`
+	);
+});
+// let pumpData = null;
+// client.on("message", (topic, message) => {
+// 	console.log(`Dữ liệu mới từ ${topic}: ${message.toString()}`);
+// 	pumpData = message.toString();
+// });
+app.get("/api/getmaybom", async (req, res) => {
+	try {
+		const pumpData = await axiosClient.get(`/${process.env.MAYBOM_FEED}/data`);
+		if (pumpData) {
+			// console.log(pumpData.data);
+			return res.status(200).json(pumpData.data);
+		}
+	} catch (err) {
+		console.err(err);
+		return res.status(400).json({ error: "Get not get the data" });
+	}
+});
+app.get("/api/getled", async (req, res) => {
+	const { id } = req.query;
+	console.log(id);
+	try {
+		const pumpData = await axiosClient.get(`/${process.env.LED_FEED}/data`);
+		if (pumpData) {
+			// console.log(pumpData.data);
+			console.log(pumpData.data);
+			return res.status(200).json(pumpData.data);
+		}
+	} catch (err) {
+		console.err(err);
+		return res.status(400).json({ error: "Get not get the data" });
+	}
+});
+
 app.use("/", (req, res) => {
 	res.status(200).json({ msg: "Hello world" });
 });
-
 // const port = process.env.PORT | 3000;
 // Connect to database
 app.listen(process.env.PORT, () => {
