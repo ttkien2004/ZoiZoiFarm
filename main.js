@@ -76,18 +76,12 @@ app.use("/api/sensor", sensorRoutes);
 // For warning
 app.use("/api/warning", warningRoutes);
 
-// Connect to adafruit
-client.on("connect", () => {
-	console.log("Connect successful");
-	client.subscribe(
-		`${process.env.AIO_USERNAME}/feeds/${process.env.FEED_NAME}`
-	);
-});
 // let pumpData = null;
 // client.on("message", (topic, message) => {
 // 	console.log(`Dữ liệu mới từ ${topic}: ${message.toString()}`);
 // 	pumpData = message.toString();
 // });
+// Just using for testing, I will modify it soon
 app.get("/api/getmaybom", async (req, res) => {
 	try {
 		const pumpData = await axiosClient.get(`/${process.env.MAYBOM_FEED}/data`);
