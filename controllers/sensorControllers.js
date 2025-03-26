@@ -238,7 +238,7 @@ exports.getSensorData = async (req, res) => {
   try {
     const sensorData = await prisma.data.findMany({
       orderBy: { dataTime: 'desc' },
-      take: 100,
+      take: 3,
     });
 
     res.status(200).json({

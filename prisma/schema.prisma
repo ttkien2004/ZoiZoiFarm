@@ -44,10 +44,10 @@ model device {
   userID    Int?
   controls  controls[]
   user      user?      @relation(fields: [userID], references: [userID], onUpdate: NoAction, map: "device_ibfk_1")
-  led_light led_light? @relation(fields: [led_lightLightID], references: [lightID])
+  led_light led_light? @relation(fields: [led_lightID], references: [lightID])
   pump      pump?      @relation(fields: [pumpPumpID], references: [pumpID])
 
-  led_lightLightID Int?
+  led_lightID Int?
   pumpPumpID       Int?
 
   @@index([userID], map: "userID")

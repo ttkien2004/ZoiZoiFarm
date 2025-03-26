@@ -11,12 +11,8 @@ const lightRoutes = require("./routes/lightRoutes");
 const deviceRoutes = require("./routes/deviceRoutes");
 const sensorRoutes = require("./routes/sensorRoutes");
 const warningRoutes = require("./routes/warningRoutes");
-const mqtt = require("./mqttConnect/mqttConfigmqtt");
-const axios = require("axios");
-const client = mqtt.connect(`mqtt://io.adafruit.com`, {
-	username: process.env.AIO_USERNAME,
-	password: process.env.AIO_KEY,
-});
+const adafruitRoutes = require("./routes/adafruitRoutes");
+const scheduler = require("./controllers/scheduler");
 const axiosClient = require("./axiosConfig/axiosConfig");
 // const swaggerSpec = swaggerJsdoc(swaggerOptions);
 // app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
@@ -42,7 +38,7 @@ const swaggerOptions = {
 			},
 		],
 	},
-	apis: ["./routes/*.js"], // Path to the API docs
+	apis: ["./routes/*.js"],
 };
 // Initialize swagger
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
@@ -75,39 +71,38 @@ app.use("/api/sensor", sensorRoutes);
 // For warning
 app.use("/api/warning", warningRoutes);
 
-// let pumpData = null;
-// client.on("message", (topic, message) => {
-// 	console.log(`Dữ liệu mới từ ${topic}: ${message.toString()}`);
-// 	pumpData = message.toString();
+// For get data from adafruit
+app.use("/api/adafruit", adafruitRoutes);
+
+
+// // Just using for testing, I will modify it soon
+// app.get("/api/getmaybom", async (req, res) => {
+// 	try {
+// 		const pumpData = await axiosClient.get(`/${process.env.MAYBOM_FEED}/data`);
+// 		if (pumpData) {
+// 			// console.log(pumpData.data);
+// 			return res.status(200).json(pumpData.data);
+// 		}
+// 	} catch (err) {
+// 		console.err(err);
+// 		return res.status(400).json({ error: "Get not get the data" });
+// 	}
 // });
-// Just using for testing, I will modify it soon
-app.get("/api/getmaybom", async (req, res) => {
-	try {
-		const pumpData = await axiosClient.get(`/${process.env.MAYBOM_FEED}/data`);
-		if (pumpData) {
-			// console.log(pumpData.data);
-			return res.status(200).json(pumpData.data);
-		}
-	} catch (err) {
-		console.err(err);
-		return res.status(400).json({ error: "Get not get the data" });
-	}
-});
-app.get("/api/getled", async (req, res) => {
-	const { id } = req.query;
-	console.log(id);
-	try {
-		const pumpData = await axiosClient.get(`/${process.env.LED_FEED}/data`);
-		if (pumpData) {
-			// console.log(pumpData.data);
-			console.log(pumpData.data);
-			return res.status(200).json(pumpData.data);
-		}
-	} catch (err) {
-		console.err(err);
-		return res.status(400).json({ error: "Get not get the data" });
-	}
-});
+// app.get("/api/getled", async (req, res) => {
+// 	const { id } = req.query;
+// 	console.log(id);
+// 	try {
+// 		const pumpData = await axiosClient.get(`/${process.env.LED_FEED}/data`);
+// 		if (pumpData) {
+// 			// console.log(pumpData.data);
+// 			console.log(pumpData.data);
+// 			return res.status(200).json(pumpData.data);
+// 		}
+// 	} catch (err) {
+// 		console.err(err);
+// 		return res.status(400).json({ error: "Get not get the data" });
+// 	}
+// });
 
 app.use("/", (req, res) => {
 	res.status(200).json({ msg: "Hello world" });

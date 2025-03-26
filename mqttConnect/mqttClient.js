@@ -12,78 +12,106 @@ const client = mqtt.connect('mqtt://io.adafruit.com', {
 client.on('connect', () => {
   console.log('Connected to Adafruit IO!');
   
-  client.subscribe(config.topics.temperature, (err) => {
+  // Đăng ký các topic cần lắng nghe từ Adafruit IO
+  client.subscribe(Object.values(config.topics), (err) => {
     if (err) {
-      console.error('Error subscribing to temperature feed:', err);
+      console.error('Error subscribing to feeds:', err);
     } else {
-      console.log('Subscribed to temperature feed');
-    }
-  });
-
-  client.subscribe(config.topics.soil_moisture, (err) => {
-    if (err) {
-      console.error('Error subscribing to soil moisture feed:', err);
-    } else {
-      console.log('Subscribed to soil moisture feed');
-    }
-  });
-
-  client.subscribe(config.topics.light_intensity, (err) => {
-    if (err) {
-      console.error('Error subscribing to light intensity feed:', err);
-    } else {
-      console.log('Subscribed to light intensity feed');
+      console.log('Subscribed to all feeds');
     }
   });
 });
 
+// Xử lý các message nhận được từ MQTT
 client.on('message', async (topic, message) => {
   const data = message.toString();
   console.log(`Received data from ${topic}: ${data}`);
 
   let sensorID;
   let sensorName;
+  let deviceID;
+  let ledLightID;
+  let pumpID;
   
-  if (topic === config.topics.temperature) {
-    sensorID = 1;  
-    sensorName = 'Temperature Sensor';
-  } else if (topic === config.topics.soil_moisture) {
-    sensorID = 2; 
-    sensorName = 'Soil Moisture Sensor';
-  } else if (topic === config.topics.light_intensity) {
-    sensorID = 3; 
+  // Gán ID và tên cảm biến hoặc thiết bị dựa trên topic
+  if (topic === config.topics.humd) {
+    sensorID = 1;
+    sensorName = 'Humidity Sensor';
+  } else if (topic === config.topics.led) {
+    deviceID = 1;  // LED là device
+    ledLightID = 1; // Gán ID cho đèn LED
+    sensorName = 'LED';
+  } else if (topic === config.topics.lux) {
+    sensorID = 2;
     sensorName = 'Light Intensity Sensor';
+  } else if (topic === config.topics.maybom) {
+    deviceID = 2;  // Máy bơm là device
+    pumpID = 2;    // Gán ID cho máy bơm
+    sensorName = 'Pump';
+  } else if (topic === config.topics.somo) {
+    sensorID = 4;
+    sensorName = 'Somo';
+  } else if (topic === config.topics.status) {
+    sensorID = 5;
+    sensorName = 'Status Sensor';
+  } else if (topic === config.topics.temp) {
+    sensorID = 6;
+    sensorName = 'Temperature Sensor';
   }
 
   try {
-    const newData = await prisma.data.create({
-      data: {
-        sensorID,
-        dataTime: new Date(),
-        value: parseFloat(data),
-      },
-    });
-    console.log('New data saved:', newData);
+    if (sensorID) {
+      // Lưu dữ liệu cảm biến vào bảng data trong cơ sở dữ liệu
+      const newData = await prisma.data.create({
+        data: {
+          sensorID,
+          dataTime: new Date(),
+          value: parseFloat(data),
+        },
+      });
+      console.log('New sensor data saved:', newData);
+    }
 
-    await prisma.controls.create({
-      data: {
-        userID: 1, 
-        deviceID: sensorID, 
-        timeSwitch: new Date(),
-        action: `Received data from ${sensorName}: ${data}`,
-      },
-    });
+    if (deviceID) {
+      // Lưu thông tin về thiết bị vào bảng controls
+      await prisma.controls.create({
+        data: {
+          userID: 1,  // Cần xác định userID thực tế
+          deviceID: deviceID,
+          timeSwitch: new Date(),
+          action: `Received data from ${sensorName}: ${data}`,
+        },
+      });
+      console.log('Device log saved to controls.');
+    }
 
-    console.log('Log saved to controls.');
+    // Lưu thông tin cho LED vào bảng led_light nếu có
+    if (ledLightID) {
+      await prisma.led_light.upsert({
+        where: { lightID: ledLightID },
+        update: { state: data === 'on' ? 'on' : 'off' }, // Ví dụ kiểm tra nếu giá trị là 'on' hoặc 'off'
+        create: { lightID: ledLightID, state: data === 'on' ? 'on' : 'off' },
+      });
+      console.log('LED light state updated or created.');
+    }
+
+    // Lưu thông tin cho Pump vào bảng pump nếu có
+    if (pumpID) {
+      await prisma.pump.upsert({
+        where: { pumpID: pumpID },
+        update: { state: data === 'on' ? 'on' : data === 'off' ? 'off' : 'auto' }, // Ví dụ điều chỉnh trạng thái pump
+        create: { pumpID: pumpID, state: data === 'on' ? 'on' : data === 'off' ? 'off' : 'auto' },
+      });
+      console.log('Pump state updated or created.');
+    }
+
   } catch (error) {
     console.error('Error saving data to database:', error);
   }
 });
 
-// Đặt vòng lặp nhận dữ liệu mỗi 15 giây
+// Đặt vòng lặp để yêu cầu dữ liệu (dữ liệu sẽ được tự động gửi khi có)
 setInterval(() => {
   console.log('Requesting latest data...');
-  client.publish(config.topics.temperature, '');
-  client.publish(config.topics.soil_moisture, '');
-  client.publish(config.topics.light_intensity, '');
+  // Lệnh này không cần thiết nữa, vì dữ liệu sẽ được tự động nhận khi có từ MQTT.
 }, 15000);

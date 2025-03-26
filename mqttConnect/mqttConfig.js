@@ -1,13 +1,17 @@
 module.exports = {
     // Thông tin tài khoản Adafruit IO
     username: 'haile02052004',
-    key: '123456',
+    key: 'haile0205',
   
     // Các topic cho từng cảm biến
     topics: {
-      temperature: 'haile02052004/feeds/temperature',
-      soil_moisture: 'haile02052004/feeds/soil_moisture',
-      light_intensity: 'haile02052004/feeds/light_intensity',
+      humd: 'haile02052004/feeds/HUMD', // Cảm biến độ ẩm
+      led: 'haile02052004/feeds/Led',   // Điều khiển đèn LED
+      lux: 'haile02052004/feeds/Lux',   // Cảm biến ánh sáng
+      maybom: 'haile02052004/feeds/MAYBOM', // Cảm biến máy bơm
+      somo: 'haile02052004/feeds/SOMO',  // ?
+      status: 'haile02052004/feeds/STATUS', // ?
+      temp: 'haile02052004/feeds/TEMP',   // Cảm biến nhiệt độ
     }
   };
   

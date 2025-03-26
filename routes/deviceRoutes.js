@@ -21,7 +21,7 @@ router.get('/', getAllDevices);
  * @swagger
  * /api/device/{deviceID}/status:
  *   put:
- *     summary: Updata device status
+ *     summary: Update device status
  *     description: Able or disable a device
  *     tags: ["Device"]
  *     parameters:
