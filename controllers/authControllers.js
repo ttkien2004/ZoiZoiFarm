@@ -9,7 +9,6 @@ const createToken = () => {
 };
 
 async function signup(username, password) {
-	// validation
 	if (!username || !password) {
 		throw Error("All fields must be filled");
 	}

@@ -30,6 +30,7 @@ exports.addPump = async (req, res) => {
         autoLevel,
         schedule,
         state,
+        deviceID: newDevice.deviceID,
       },
     });
 
@@ -189,3 +190,4 @@ exports.getPumpStatus = async (req, res) => {
       return res.status(500).json({ message: "Lỗi server", error: error.message });
   }
 };
+

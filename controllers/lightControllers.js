@@ -27,6 +27,7 @@ exports.addLight = async (req, res) => {
       data: {
         lightID: newDevice.deviceID,
         state,
+        deviceID: newDevice.deviceID,
       },
     });
 
