@@ -74,36 +74,6 @@ app.use("/api/warning", warningRoutes);
 // For get data from adafruit
 app.use("/api/adafruit", adafruitRoutes);
 
-
-// // Just using for testing, I will modify it soon
-// app.get("/api/getmaybom", async (req, res) => {
-// 	try {
-// 		const pumpData = await axiosClient.get(`/${process.env.MAYBOM_FEED}/data`);
-// 		if (pumpData) {
-// 			// console.log(pumpData.data);
-// 			return res.status(200).json(pumpData.data);
-// 		}
-// 	} catch (err) {
-// 		console.err(err);
-// 		return res.status(400).json({ error: "Get not get the data" });
-// 	}
-// });
-// app.get("/api/getled", async (req, res) => {
-// 	const { id } = req.query;
-// 	console.log(id);
-// 	try {
-// 		const pumpData = await axiosClient.get(`/${process.env.LED_FEED}/data`);
-// 		if (pumpData) {
-// 			// console.log(pumpData.data);
-// 			console.log(pumpData.data);
-// 			return res.status(200).json(pumpData.data);
-// 		}
-// 	} catch (err) {
-// 		console.err(err);
-// 		return res.status(400).json({ error: "Get not get the data" });
-// 	}
-// });
-
 app.use("/", (req, res) => {
 	res.status(200).json({ msg: "Hello world" });
 });
