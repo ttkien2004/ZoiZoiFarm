@@ -114,6 +114,20 @@ router.put('/:lightID/state', toggleLedState);
  *     responses:
  *       200:
  *         description: Successfully retrieved LED light status
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 lightID:
+ *                   type: integer
+ *                   example: 2
+ *                 deviceID:
+ *                   type: integer
+ *                   example: 2
+ *                 state:
+ *                   type: string
+ *                   example: off
  *       404:
  *         description: LED light not found
  *       500:

@@ -6,9 +6,12 @@ exports.getAllDevices = async (req, res) => {
     try {
         // Lấy danh sách tất cả các thiết bị
         const devices = await prisma.device.findMany({
+            orderBy: {
+                status: 'asc'
+              },
             include: {
-                pump: true, // Kiểm tra nếu là máy bơm
-                led_light: true // Kiểm tra nếu là đèn LED
+                pump: true, 
+                led_light: true 
             }
         });
 
@@ -33,7 +36,6 @@ exports.updateDeviceStatus = async (req, res) => {
   const { deviceID } = req.params;
   const { status, userID } = req.body;
 
-  // Kiểm tra input hợp lệ
   if (!userID) {
       return res.status(400).json({ message: "Yêu cầu phải cung cấp userID!" });
   }
@@ -43,7 +45,6 @@ exports.updateDeviceStatus = async (req, res) => {
   }
 
   try {
-      // Lấy thông tin thiết bị để lấy tên
       const device = await prisma.device.findUnique({
           where: { deviceID: parseInt(deviceID) },
       });
@@ -58,7 +59,6 @@ exports.updateDeviceStatus = async (req, res) => {
           data: { status },
       });
 
-      // Tạo nội dung hành động cho bảng controls
       const actionMessage = status === "able"
           ? `${device.deviceName} hoạt động trở lại.`
           : `${device.deviceName} bị vô hiệu hóa.`;
@@ -84,14 +84,12 @@ exports.updateDeviceStatus = async (req, res) => {
   }
 };
 
-
 // Delete a device
 exports.deleteDevice = async (req, res) => {
   const { deviceID } = req.params;
   const { userID } = req.body;
 
   try {
-      // Kiểm tra thiết bị có tồn tại không
       const existingDevice = await prisma.device.findUnique({
           where: { deviceID: parseInt(deviceID) },
           include: {
@@ -104,7 +102,6 @@ exports.deleteDevice = async (req, res) => {
           return res.status(404).json({ message: "Thiết bị không tồn tại!" });
       }
 
-      // Lưu thông tin thiết bị trước khi xóa
       const deletedDeviceInfo = {
           deviceID: existingDevice.deviceID,
           deviceName: existingDevice.deviceName,
@@ -135,11 +132,10 @@ exports.deleteDevice = async (req, res) => {
           });
       }
 
-      // 🟢 Ghi vào bảng controls mà không liên kết deviceID để tránh lỗi khóa ngoại
       await prisma.controls.create({
           data: {
-              userID: userID, // Lấy từ request body
-              deviceID: null, // Không liên kết với bảng device nữa
+              userID: userID, 
+              deviceID: null, 
               timeSwitch: new Date(),
               action: `${deletedDeviceInfo.deviceName} đã bị xóa khỏi hệ thống`,
           }
@@ -157,7 +153,7 @@ exports.deleteDevice = async (req, res) => {
   }
 };
 
-//Get state of a device
+//Get status of a device
 exports.getDeviceState = async (req, res) => {
     const { deviceID } = req.params;
   
@@ -188,6 +184,7 @@ exports.getDeviceState = async (req, res) => {
       res.status(200).json({
         deviceID: device.deviceID,
         deviceName: device.deviceName,
+        status: device.status,
         state,
       });
   

@@ -54,8 +54,6 @@ exports.addSensor = async (req, res) => {
   }
 };
 
-
-
 // Get sensor list
 exports.getSensors = async (req, res) => {
     try {
@@ -126,7 +124,6 @@ exports.updateSensorStatus = async (req, res) => {
   }
 };
 
-
 // Update alertThreshold
 exports.updateAlertThreshold = async (req, res) => {
   const { sensorID } = req.params;
@@ -172,7 +169,6 @@ exports.updateAlertThreshold = async (req, res) => {
       res.status(500).json({ message: "Lỗi khi cập nhật alertThreshold.", error: error.message });
   }
 };
-
 
 // Delete a sensor
 exports.deleteSensor = async (req, res) => {
@@ -233,10 +229,16 @@ exports.deleteSensor = async (req, res) => {
   }
 };
 
-// Controller để lấy dữ liệu cảm biến
 exports.getSensorData = async (req, res) => {
+  const { sensorID } = req.params; 
+
+  if (!sensorID) {
+    return res.status(400).json({ message: 'Vui lòng cung cấp sensorID!' });
+  }
+
   try {
     const sensorData = await prisma.data.findMany({
+      where: { sensorID: parseInt(sensorID) },
       orderBy: { dataTime: 'desc' },
       take: 3,
     });

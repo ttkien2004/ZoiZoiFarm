@@ -12,6 +12,31 @@ const { getAllDevices, updateDeviceStatus, deleteDevice, getDeviceState } = requ
  *     responses:
  *       200:
  *         description: Successfully retrieved the list of devices
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       deviceID: 
+ *                         type: int
+ *                         example: 1
+ *                       deviceName:
+ *                         type: string
+ *                         example: Máy bơm số 1
+ *                       quantity:  
+ *                         type: int
+ *                         example: 2 
+ *                       status:  
+ *                         type: string
+ *                         example: able
+ *                       type:
+ *                         type: string
+ *                         example: pump
  *       500:
  *         description: Internal server error
  */
@@ -61,7 +86,7 @@ router.put("/:deviceID/status", updateDeviceStatus);
  * /api/device/{deviceID}:
  *   delete:
  *     summary: Delete device
- *     description: Xóa thiết bị theo `deviceID` và cập nhật `quantity` của tất cả thiết bị cùng loại.
+ *     description: Delete a device and update `quantity` of all devices have the same type.
  *     tags: ["Device"]
  *     parameters:
  *       - in: path
@@ -95,10 +120,10 @@ router.delete("/:deviceID", deleteDevice);
 
 /**
  * @swagger
- * /api/device/{deviceID}/state:
+ * /api/device/{deviceID}/status:
  *   get:
- *     summary: Get device state
- *     description: Trả về trạng thái của thiết bị (Pump hoặc LED Light)
+ *     summary: Get device status
+ *     description: Get status of device (able or disable)
  *     tags: ["Device"]
  *     parameters:
  *       - in: path
@@ -120,10 +145,13 @@ router.delete("/:deviceID", deleteDevice);
  *                   example: 5
  *                 deviceName:
  *                   type: string
- *                   example: "Máy bơm số 1"
+ *                   example: Máy bơm số 1
+ *                 status:
+ *                   type: string
+ *                   example: able
  *                 state:
  *                   type: string
- *                   example: "on"
+ *                   example: on
  *       404:
  *         description: Thiết bị không tồn tại
  *       500:

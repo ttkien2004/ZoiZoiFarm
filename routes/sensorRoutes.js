@@ -7,7 +7,7 @@ const { addSensor, getSensors, updateSensorStatus, updateAlertThreshold, deleteS
  * /api/sensor:
  *   post:
  *     summary: Add sensor
- *     description: Thêm một cảm biến mới vào hệ thống, cập nhật tổng số lượng cảm biến cùng loại và ghi lại vào bảng controls.
+ *     description: Add a new sensor
  *     tags: ["Sensor"]
  *     requestBody:
  *       required: true
@@ -162,7 +162,7 @@ router.put('/:sensorID/status', updateSensorStatus);
  * /api/sensor/{sensorID}/alertThreshold:
  *   put:
  *     summary: Update alertThreshold
- *     description: Cập nhật giá trị alertThreshold của một cảm biến và lưu vào bảng controls.
+ *     description: Update alertThreshold of a sensor
  *     tags: ["Sensor"]
  *     parameters:
  *       - in: path
@@ -202,7 +202,7 @@ router.put('/:sensorID/alertThreshold', updateAlertThreshold);
  * /api/sensor/{sensorID}:
  *   delete:
  *     summary: Delete sensor
- *     description: Xóa một cảm biến khỏi hệ thống, cập nhật quantity của tất cả cảm biến cùng loại và ghi vào bảng controls.
+ *     description: Delete a sensor and update quantity of all same type sensors
  *     tags: ["Sensor"]
  *     parameters:
  *       - in: path
@@ -233,13 +233,21 @@ router.put('/:sensorID/alertThreshold', updateAlertThreshold);
  *         description: Lỗi server
  */
 router.delete('/:sensorID', deleteSensor);
+
 /**
  * @swagger
- * /api/sensor/data:
+ * /api/sensor/{sensorID}/data:
  *   get:
  *     summary: Get data of sensor
- *     description: Get the newest data of sensor
+ *     description: Get the newest data of sensor by sensorID.
  *     tags: ["Sensor"]
+ *     parameters:
+ *       - in: path
+ *         name: sensorID
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID của cảm biến
  *     responses:
  *       200:
  *         description: Lấy dữ liệu cảm biến thành công
@@ -256,6 +264,9 @@ router.delete('/:sensorID', deleteSensor);
  *                   items:
  *                     type: object
  *                     properties:
+ *                       dataID:
+ *                         type: integer
+ *                         example: 1
  *                       sensorID:
  *                         type: integer
  *                         example: 1
@@ -266,9 +277,6 @@ router.delete('/:sensorID', deleteSensor);
  *                       value:
  *                         type: number
  *                         example: 25.5
- *                       unit:
- *                         type: string
- *                         example: "Celsius"
  *       500:
  *         description: Lỗi khi lấy dữ liệu cảm biến
  *         content:
@@ -283,5 +291,6 @@ router.delete('/:sensorID', deleteSensor);
  *                   type: string
  *                   example: "Database connection failed"
  */
-router.get('/data', getSensorData);
+router.get('/:sensorID/data', getSensorData);
+
 module.exports = router;

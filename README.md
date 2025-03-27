@@ -6,9 +6,11 @@
 
 ## 🚀 Các chức năng chính
 
-- Ghi nhận dữ liệu từ cảm biến độ ẩm
+- Ghi nhận dữ liệu từ cảm biến độ ẩm và nhiệt độ không khí
+- Ghi nhận dữ liệu từ cảm biến độ ẩm đất
 - Ghi nhận dữ liệu từ cảm biến ánh sáng
 - Bật/ tắt máy bơm
+- Cài đặt thời gian bật / tắt máy bơm tự độngđộng
 - Bật/ tắt đèn LED
 - Đăng ký/ Đăng nhập
 
@@ -39,6 +41,11 @@
       PORT=3000
       DATABASE_URL="mysql://<your_username>:<your_password>@localhost:<your_port>/<your_database_name>?schema=public"
       SECRET=kientrantrungbksvtrungkientranmsdcdcgodskgodaskfodkaojjdfj
+
+      #Cấu hình adafruit
+      AIO_KEY="<adafruit_aio_key>"
+      AIO_USERNAME="<adafuit_name>"
+      MQTT_BROKER_URL="mqtt://broker.hivemq.com"
       ```
 
 ### Chạy chương trình

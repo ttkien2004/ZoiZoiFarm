@@ -1,5 +1,6 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+const axiosClient = require('../axiosConfig/axiosConfig');
 
 // Add Pump and Log to Controls
 exports.addPump = async (req, res) => {
@@ -10,11 +11,10 @@ exports.addPump = async (req, res) => {
   }
 
   try {
-    // Tạo thiết bị mới với số lượng mặc định là 1
     const newDevice = await prisma.device.create({
       data: {
         deviceName,
-        quantity: 1, // Ban đầu set 1
+        quantity: 1, 
         status,
       },
     });
@@ -23,7 +23,6 @@ exports.addPump = async (req, res) => {
       return res.status(400).json({ message: "Lỗi: Không thể tạo thiết bị!" });
     }
 
-    // Thêm thông tin máy bơm liên kết với thiết bị vừa tạo
     const newPump = await prisma.pump.create({
       data: {
         pumpID: newDevice.deviceID,
@@ -39,11 +38,10 @@ exports.addPump = async (req, res) => {
 
     // Cập nhật tổng số lượng máy bơm trong `device`
     await prisma.device.updateMany({
-      where: { pump: { isNot: null } }, // Chỉ cập nhật cho thiết bị là máy bơm
+      where: { pump: { isNot: null } }, 
       data: { quantity: totalPumps },
     });
 
-    // Ghi log vào bảng `controls`
     await prisma.controls.create({
       data: {
         userID,
@@ -65,56 +63,6 @@ exports.addPump = async (req, res) => {
   }
 };
 
-// Switch Pump State and Log to Controls
-exports.togglePumpState = async (req, res) => {
-  const pumpID = parseInt(req.params.pumpID);
-  const { state, userID } = req.body;
-
-  if (!userID) {
-    return res.status(400).json({ message: 'Yêu cầu phải cung cấp userID!' });
-  }
-
-  if (!['on', 'off', 'auto'].includes(state)) {
-    return res.status(400).json({ message: 'Trạng thái không hợp lệ!' });
-  }
-
-  try {
-    // Lấy thông tin máy bơm và tên thiết bị
-    const pump = await prisma.pump.findUnique({
-      where: { pumpID },
-      include: { device: true }, // Lấy cả thông tin thiết bị
-    });
-
-    if (!pump) {
-      return res.status(404).json({ message: 'Máy bơm không tồn tại!' });
-    }
-
-    // Cập nhật trạng thái của máy bơm
-    const updatedPump = await prisma.pump.update({
-      where: { pumpID },
-      data: { state },
-    });
-
-    // Ghi log vào bảng `controls`
-    await prisma.controls.create({
-      data: {
-        userID,
-        deviceID: pumpID,
-        timeSwitch: new Date(),
-        action: `Điều chỉnh ${pump.device.deviceName} thành ${state}`,
-      },
-    });
-
-    res.status(200).json({
-      message: 'Đã cập nhật trạng thái máy bơm thành công!',
-      pump: updatedPump,
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Lỗi khi cập nhật trạng thái máy bơm.', error: error.message });
-  }
-};
-
 
 //Set pump schedule
 exports.setPumpSchedule = async (req, res) => {
@@ -126,26 +74,23 @@ exports.setPumpSchedule = async (req, res) => {
           return res.status(400).json({ message: 'Yêu cầu phải cung cấp userID!' });
       }
 
-      // Kiểm tra xem máy bơm có tồn tại không
       const pump = await prisma.pump.findUnique({
           where: { pumpID: parseInt(pumpID) },
-          include: { device: true } // Lấy thông tin thiết bị liên quan
+          include: { device: true } 
       });
 
       if (!pump) {
           return res.status(404).json({ message: 'Máy bơm không tồn tại' });
       }
 
-      // Cập nhật lịch trình tưới tiêu
       const updatedPump = await prisma.pump.update({
           where: { pumpID: parseInt(pumpID) },
           data: {
-              schedule: schedule || pump.schedule, // Nếu không có giá trị mới, giữ nguyên
+              schedule: schedule || pump.schedule, 
               autoLevel: autoLevel !== undefined ? autoLevel : pump.autoLevel,
           },
       });
 
-      // Ghi log vào bảng controls
       await prisma.controls.create({
           data: {
               userID,
@@ -162,32 +107,108 @@ exports.setPumpSchedule = async (req, res) => {
   }
 };
 
-//Get pump status
-exports.getPumpStatus = async (req, res) => {
+// Get status of pump from Adafruit IO (feed "maybom"), 
+exports.getPumpAdafruitState = async (req, res) => {
   try {
-      const { pumpID } = req.params;
+    const { pumpID } = req.params;
 
-      // Tìm máy bơm theo ID
-      const pump = await prisma.pump.findUnique({
-          where: { pumpID: parseInt(pumpID) },
-          include: { device: true }, // Lấy thông tin thiết bị liên quan
+    const pump = await prisma.pump.findUnique({
+      where: { pumpID: parseInt(pumpID) },
+      include: { device: true }, 
+    });
+    if (!pump) {
+      return res.status(404).json({ error: 'Không tìm thấy máy bơm!' });
+    }
+
+    // Gọi Adafruit IO, lấy 1 bản ghi mới nhất
+    const response = await axiosClient.get('/maybom/data?limit=1');
+    const feedData = response.data; 
+    if (feedData.length === 0) {
+      return res.status(200).json({ 
+        pumpID: pumpID,
+        state: null,
+        message: 'Chưa có dữ liệu trên feed maybom' ,
+        deviceID: pump.device.deviceID,
+        autoLevel: pump.autoLevel,
+        schedule: pump.schedule,
+        state: pump.state,
       });
+    }
 
-      if (!pump) {
-          return res.status(404).json({ message: "Máy bơm không tồn tại" });
-      }
+    const lastValue = feedData[0].value; 
+    let newState = 'off';
+    if (lastValue === '1') newState = 'on';
 
-      return res.status(200).json({
-          pumpID: pump.pumpID,
-          deviceID: pump.device.deviceID,
-          autoLevel: pump.autoLevel,
-          schedule: pump.schedule,
-          state: pump.state,
-      });
+    const updatedPump = await prisma.pump.update({
+      where: { pumpID: parseInt(pumpID) },
+      data: { state: newState }, 
+    });
 
+    return res.status(200).json({
+      pumpID: pumpID,
+      deviceName: pump.device.deviceName,
+      state: newState,
+      message: 'Lấy trạng thái máy bơm thành công!',
+      deviceID: pump.device.deviceID,
+      autoLevel: pump.autoLevel,
+      schedule: pump.schedule,
+      state: pump.state,
+    });
   } catch (error) {
-      console.error(error);
-      return res.status(500).json({ message: "Lỗi server", error: error.message });
+    console.error('Lỗi khi lấy trạng thái máy bơm:', error);
+    return res.status(500).json({ error: 'Không thể lấy trạng thái máy bơm.' });
   }
 };
 
+//Turn on / off pump
+exports.setPumpAdafruitState = async (req, res) => {
+  try {
+    const { pumpID } = req.params;
+    const { state, userID } = req.body;
+    
+    const pump = await prisma.pump.findUnique({
+      where: { pumpID: parseInt(pumpID) },
+      include: { device: true }, 
+    });
+    if (!pump) {
+      return res.status(404).json({ error: 'Không tìm thấy máy bơm!' });
+    }
+
+    if (!['on', 'off', 'auto'].includes(state)) {
+      return res.status(400).json({ error: 'Trạng thái không hợp lệ (on/off/auto)' });
+    }
+
+    let feedValue = '0';
+    if (state === 'on') feedValue = '1';
+    else if (state === 'auto') feedValue = '2'; 
+
+    await axiosClient.post('/maybom/data', {
+      value: feedValue
+    });
+
+    const updatedPump = await prisma.pump.update({
+      where: { pumpID: parseInt(pumpID) },
+      data: { state },
+    });
+
+    const deviceID = pump.device?.deviceID; 
+    if (userID) {
+      await prisma.controls.create({
+        data: {
+          userID: parseInt(userID),
+          deviceID: deviceID || null, 
+          timeSwitch: new Date(),
+          action: `Cập nhật máy bơm ${pump.device?.deviceName || ''} thành ${state}`,
+        }
+      });
+    }
+
+    return res.status(200).json({
+      message: `Đã cập nhật máy bơm sang trạng thái ${state}`,
+      pump: updatedPump,
+    });
+  } catch (error) {
+    console.error('Lỗi khi đặt trạng thái máy bơm:', error);
+    return res.status(500).json({ error: 'Không thể đặt trạng thái máy bơm.' });
+  }
+};
