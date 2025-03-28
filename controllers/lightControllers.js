@@ -1,5 +1,6 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+const axiosClient = require('../axiosConfig/axiosConfig');
 
 // Add a light
 exports.addLight = async (req, res) => {
@@ -129,5 +130,103 @@ exports.getLightStatus = async (req, res) => {
   } catch (error) {
       console.error(error);
       return res.status(500).json({ message: "Lỗi server", error: error.message });
+  }
+};
+
+
+// Turn on / off aa LED thông qua Adafruit IO
+exports.setLedAdafruitState = async (req, res) => {
+  try {
+    const { lightID } = req.params;          
+    const { state, userID } = req.body; 
+
+    if (!["on", "off"].includes(state)) {
+      return res.status(400).json({ error: "Trạng thái không hợp lệ (on/off)" });
+    }
+
+    const led = await prisma.led_light.findUnique({
+      where: { lightID: parseInt(lightID) },
+      include: { device: true },
+    });
+
+    if (!led) {
+      return res.status(404).json({ error: "Không tìm thấy LED!" });
+    }
+
+    const feedValue = state === "on" ? "1" : "0";
+
+    await axiosClient.post(`/led/data`, { value: feedValue });
+
+    await prisma.led_light.update({
+      where: { lightID: led.lightID },
+      data: { state },
+    });
+
+    if (userID) {
+      await prisma.controls.create({
+        data: {
+          userID: parseInt(userID),
+          deviceID: led.deviceID || null,
+          timeSwitch: new Date(),
+          action: `Bật/tắt LED ID=${lightID} => ${state}`,
+        },
+      });
+    }
+
+    return res.status(200).json({
+      message: `LED ID=${lightID} đã chuyển sang ${state} trên Adafruit IO`,
+    });
+  } catch (err) {
+    console.error("Lỗi khi đặt trạng thái LED:", err);
+    return res.status(500).json({ error: "Không thể đặt trạng thái LED." });
+  }
+};
+
+// Get status of light from Adafruit IO (feed "led"), 
+
+exports.getLedAdafruitState = async (req, res) => {
+  try {
+    const { lightID } = req.params;
+
+    const led = await prisma.led_light.findUnique({
+      where: { lightID: parseInt(lightID) },
+      include: { device: true }, 
+    });
+
+    if (!led) {
+      return res.status(404).json({ error: "Không tìm thấy LED!" });
+    }
+
+    const feedKey = "led"; 
+    // const feedKey = led.feedKey; (Để sẵn đây thôi mốt nhiều led thì mình mới sửa lạilại)
+
+    const response = await axiosClient.get(`/${feedKey}/data?limit=1`);
+    const feedData = response.data;
+
+    if (!Array.isArray(feedData) || feedData.length === 0) {
+      return res.status(200).json({
+        lightID: led.lightID,
+        state: null,
+        message: "Chưa có dữ liệu trên feed",
+      });
+    }
+
+    const lastRecord = feedData[0];
+    const lastValue = lastRecord.value
+    let currentState = "off";
+    if (lastValue === "1") currentState = "on";
+    await prisma.led_light.update({
+      where: { lightID: led.lightID },
+      data: { state: currentState },
+    });
+
+    return res.status(200).json({
+      lightID: led.lightID,
+      state: currentState,
+      message: "Lấy trạng thái LED từ Adafruit IO thành công!",
+    });
+  } catch (error) {
+    console.error("Lỗi khi lấy trạng thái LED:", error);
+    return res.status(500).json({ error: "Không thể lấy trạng thái LED." });
   }
 };
