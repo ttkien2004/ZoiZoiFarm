@@ -46,6 +46,10 @@
       AIO_KEY="<adafruit_aio_key>"
       AIO_USERNAME="<adafuit_name>"
       MQTT_BROKER_URL="mqtt://broker.hivemq.com"
+
+      #Cấu hình mail gửi thông báo
+      EMAIL_USER="your@gmail.com"
+      EMAIL_PASS="your_app_password"
       ```
 
 ### Chạy chương trình

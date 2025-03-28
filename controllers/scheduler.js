@@ -1,44 +1,46 @@
 const cron = require('node-cron');
 const axiosClient = require('./../axiosConfig/axiosConfig');
 const { PrismaClient } = require('@prisma/client');
+const nodemailer = require("nodemailer");
 const prisma = new PrismaClient();
+const { sendEmail } = require('../services/emailService');
 
 // Lên lịch gọi API nội bộ mỗi 5 phút
-// cron.schedule('*/100 * * * *', async () => {
-//   try {
-//     await axios.get('http://localhost:3000/api/adafruit/fetch-temp');
-//     console.log('Đã tự động lấy dữ liệu feed "temp" và lưu vào database');
-//   } catch (error) {
-//     console.error('Lỗi tự động lấy dữ liệu:', error);
-//   }
-// });
+cron.schedule('*/100 * * * *', async () => {
+  try {
+    await axios.get('http://localhost:3000/api/adafruit/fetch-temp');
+    console.log('Đã tự động lấy dữ liệu feed "temp" và lưu vào database');
+  } catch (error) {
+    console.error('Lỗi tự động lấy dữ liệu:', error);
+  }
+});
 
-// cron.schedule('*/100 * * * *', async () => {
-//     try {
-//       await axios.get('http://localhost:3000/api/adafruit/fetch-humd');
-//       console.log('Đã tự động lấy dữ liệu feed "humd" và lưu vào database');
-//     } catch (error) {
-//       console.error('Lỗi tự động lấy dữ liệu:', error);
-//     }
-//   });
+cron.schedule('*/100 * * * *', async () => {
+    try {
+      await axios.get('http://localhost:3000/api/adafruit/fetch-humd');
+      console.log('Đã tự động lấy dữ liệu feed "humd" và lưu vào database');
+    } catch (error) {
+      console.error('Lỗi tự động lấy dữ liệu:', error);
+    }
+  });
 
-// cron.schedule('*/100 * * * *', async () => {
-//     try {
-//       await axios.get('http://localhost:3000/api/adafruit/fetch-lux');
-//       console.log('Đã tự động lấy dữ liệu feed "lux" và lưu vào database');
-//     } catch (error) {
-//       console.error('Lỗi tự động lấy dữ liệu:', error);
-//     }
-//   });
+cron.schedule('*/100 * * * *', async () => {
+    try {
+      await axios.get('http://localhost:3000/api/adafruit/fetch-lux');
+      console.log('Đã tự động lấy dữ liệu feed "lux" và lưu vào database');
+    } catch (error) {
+      console.error('Lỗi tự động lấy dữ liệu:', error);
+    }
+  });
 
-// cron.schedule('*/100 * * * *', async () => {
-//     try {
-//       await axios.get('http://localhost:3000/api/adafruit/fetch-lux');
-//       console.log('Đã tự động lấy dữ liệu feed "somo" và lưu vào database');
-//     } catch (error) {
-//       console.error('Lỗi tự động lấy dữ liệu:', error);
-//     }
-//   });
+cron.schedule('*/100 * * * *', async () => {
+    try {
+      await axios.get('http://localhost:3000/api/adafruit/fetch-lux');
+      console.log('Đã tự động lấy dữ liệu feed "somo" và lưu vào database');
+    } catch (error) {
+      console.error('Lỗi tự động lấy dữ liệu:', error);
+    }
+  });
 
 // Auto turn on pump
 async function turnOnPump() {
@@ -167,5 +169,45 @@ cron.schedule('*/10 * * * *', async () => {
     }
   } catch (error) {
     console.error("Lỗi khi tự động điều khiển máy bơm:", error);
+  }
+});
+
+//warningwarning
+cron.schedule('*/1 * * * *', async () => {
+  try {
+    const sensors = await prisma.sensor.findMany({
+      where: { status: 'able' },
+      include: { user: true },
+    });
+    for (const s of sensors) {
+      if (s.alertThreshold == null) continue;
+      const latestData = await prisma.data.findFirst({
+        where: { sensorID: s.sensorID },
+        orderBy: { dataTime: 'desc' },
+      });
+      if (!latestData) continue;
+
+      if (latestData.value > s.alertThreshold) {
+        // Tạo warning
+        await prisma.warning.create({
+          data: {
+            sensorID: s.sensorID,
+            message: `Sensor ${s.sensorName} vượt ngưỡng ${s.alertThreshold}`,
+            timeWarning: new Date(),
+            userID: s.userID,
+          }
+        });
+        // Gửi email
+        if (s.user?.email) {
+          await sendEmail(
+            s.user.email,
+            "Cảnh báo Sensor",
+            `Xin chào ${s.user.userName},\n\nSensor ${s.sensorName} vượt ngưỡng: ${latestData.value} > ${s.alertThreshold}`
+          );
+        }
+      }
+    }
+  } catch (err) {
+    console.error("Cron job error:", err);
   }
 });
