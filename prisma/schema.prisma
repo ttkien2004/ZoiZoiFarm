@@ -1,0 +1,133 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model controls {
+  controlID  Int      @id @default(autoincrement())
+  userID     Int?
+  deviceID   Int?
+  sensorID   Int?
+  timeSwitch DateTime @db.DateTime(0)
+  action     String   @db.VarChar(200)
+
+  user    user?   @relation(fields: [userID], references: [userID], onUpdate: NoAction, map: "controls_ibfk_1")
+  device  device? @relation(fields: [deviceID], references: [deviceID], onUpdate: NoAction, map: "controls_ibfk_device")
+  sensor  sensor? @relation(fields: [sensorID], references: [sensorID], onUpdate: NoAction, map: "controls_ibfk_sensor")
+
+  @@index([controlID], map: "controlID")
+  @@index([deviceID], map: "controls_ibfk_device")
+  @@index([sensorID], map: "controls_ibfk_sensor")
+  @@index([userID], map: "userID")
+}
+
+model data {
+  dataID   Int      @id @default(autoincrement())
+  sensorID Int
+  dataTime DateTime @db.DateTime(0)
+  value    Float    @db.Float
+  sensor   sensor   @relation(fields: [sensorID], references: [sensorID], onDelete: Cascade, onUpdate: NoAction, map: "FK_sensor_id")
+
+  @@index([dataTime], map: "dataTime")
+}
+
+model device {
+  deviceID   Int           @id @default(autoincrement())
+  deviceName String        @db.VarChar(50)
+  quantity   Int?
+  status     device_status
+  userID     Int?
+  controls   controls[]
+  
+  user       user?         @relation(fields: [userID], references: [userID], onUpdate: NoAction, map: "device_ibfk_1")
+  pump       pump?         
+  led_light  led_light?    
+  
+  @@index([userID], map: "userID")
+}
+
+model led_light {
+  lightID Int             @id
+  state   led_light_state
+  deviceID  Int        @unique
+  device    device     @relation(fields: [deviceID], references: [deviceID])
+}
+
+model pump {
+  pumpID    Int        @id
+  autoLevel Boolean
+  schedule  String?    @db.VarChar(255)
+  state     pump_state
+  deviceID  Int        @unique
+  device    device     @relation(fields: [deviceID], references: [deviceID])
+}
+
+model sensor {
+  sensorID       Int           @id @default(autoincrement())
+  sensorName     String        @db.VarChar(50)
+  type           String?       @db.VarChar(50)
+  quantity       Int?
+  alertThreshold Float?        @db.Float
+  status         sensor_status
+
+  userID   Int?
+  controls controls[]
+  data     data[]
+  warning  warning[]
+
+  user     user?      @relation(fields: [userID], references: [userID], onUpdate: NoAction, map: "sensor_ibfk_1")
+
+  @@index([sensorID], map: "sensorID")
+}
+
+model user {
+  userID    Int        @id @default(autoincrement())
+  userName  String     @unique(map: "userName") @db.VarChar(50)
+  password  String     @db.VarChar(255)
+  firstName String?    @db.VarChar(50)
+  lastName  String?    @db.VarChar(50)
+  phoneNum  String?    @unique(map: "phoneNum") @db.VarChar(15)
+  email     String?    @unique(map: "email") @db.VarChar(100)
+  controls  controls[]
+  device    device[]
+  sensor    sensor[]
+  warning   warning[]
+}
+
+model warning {
+  warningID   Int      @id @default(autoincrement())
+  sensorID    Int
+  message     String   @db.Text
+  timeWarning DateTime @db.DateTime(0)
+  userID      Int?
+  sensor      sensor   @relation(fields: [sensorID], references: [sensorID], onDelete: Cascade, onUpdate: NoAction, map: "FK_sensor_warning")
+  user        user?    @relation(fields: [userID], references: [userID], onDelete: Cascade, onUpdate: NoAction, map: "FK_user_warning")
+
+  @@index([sensorID], map: "sensorID")
+  @@index([userID], map: "FK_user_warning")
+}
+
+enum led_light_state {
+  on
+  off
+}
+
+enum device_status {
+  able
+  disable
+}
+
+enum pump_state {
+  on
+  off
+  auto
+}
+
+enum sensor_status {
+  able
+  disable
+}
