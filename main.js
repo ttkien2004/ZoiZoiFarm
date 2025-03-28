@@ -23,23 +23,56 @@ app.use(express.json());
 // All APIs needed
 // app.use(routes);
 // Swagger configuration
+// const swaggerOptions = {
+// 	definition: {
+// 		openapi: "3.0.0",
+// 		info: {
+// 			title: "ZoiZoi Farm API",
+// 			version: "1.0.0",
+// 			description: "API documentation for my Node.js app",
+// 		},
+// 		servers: [
+// 			{
+// 				url: "http://localhost:3000",
+// 				description: "Local server",
+// 			},
+// 		],
+// 	},
+// 	apis: ["./routes/*.js"],
+// };
+
 const swaggerOptions = {
 	definition: {
-		openapi: "3.0.0",
-		info: {
-			title: "ZoiZoi Farm API",
-			version: "1.0.0",
-			description: "API documentation for my Node.js app",
+	  openapi: "3.0.0",
+	  info: {
+		title: "ZoiZoi Farm API",
+		version: "1.0.0",
+		description: "API documentation for my Node.js app",
+	  },
+	  servers: [
+		{
+		  url: "http://localhost:3000",
+		  description: "Local server",
 		},
-		servers: [
-			{
-				url: "http://localhost:3000",
-				description: "Local server",
-			},
-		],
+	  ],
+	  // Thêm phần này:
+	  components: {
+		securitySchemes: {
+		  bearerAuth: {
+			type: "http",
+			scheme: "bearer",
+		  },
+		},
+	  },
+	  security: [
+		{
+		  bearerAuth: [], // áp dụng bearerAuth cho toàn bộ endpoint
+		},
+	  ],
 	},
 	apis: ["./routes/*.js"],
-};
+  };
+  
 // Initialize swagger
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
 // Swagger

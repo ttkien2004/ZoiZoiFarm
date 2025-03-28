@@ -16,6 +16,7 @@ exports.addPump = async (req, res) => {
         deviceName,
         quantity: 1, 
         status,
+        userID,
       },
     });
 

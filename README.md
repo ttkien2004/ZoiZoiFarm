@@ -63,3 +63,12 @@
    npx prisma generate
    ```
 2. Tài liệu về prisma: [https://www.prisma.io/docs/orm/prisma-client]
+
+### Auth: Phải gửi kèm header
+1. Ví dụ 1: 
+curl -X GET http://localhost:3000/api/auth/userInfor \
+  -H "Authorization: Bearer <token>"
+
+2.  Ví dụ 2: 
+GET /api/auth/userInfo
+Authorization: Bearer <token>

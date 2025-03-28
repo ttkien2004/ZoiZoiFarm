@@ -32,6 +32,7 @@ async function signup(username, password) {
 	});
 	return new_user;
 }
+
 async function login(username, password) {
 	if (!username || !password) {
 		throw Error("All fields must be filled");
@@ -41,6 +42,7 @@ async function login(username, password) {
 			userName: username,
 		},
 		select: {
+			userID: true,
 			userName: true,
 			password: true,
 		},
@@ -58,7 +60,9 @@ const loginUser = async (req, res) => {
 	const { username, password } = req.body;
 	try {
 		const user = await login(username, password);
-		res.status(201).json({ msg: "Login successfully", username });
+		const secretKey = process.env.JWT_SECRET || "secret123";
+		const token = jwt.sign({ userID: user.userID }, secretKey, { expiresIn: "1d" });
+		res.status(201).json({ msg: "Login successfully", username , userID: user.userID , token});
 	} catch (err) {
 		return res.status(400).json({ error: err.message });
 	}
@@ -74,7 +78,78 @@ const signupUser = async (req, res) => {
 	}
 };
 
+// GET user information 
+const getMe = async (req, res) => {
+	try {
+	  const userID = req.userID;
+	  const user = await prisma.user.findUnique({
+		where: { userID },
+		select: {
+		  userID: true,
+		  userName: true,
+		  password: true,
+		  email: true,
+		  firstName: true,
+		  lastName: true,
+		  phoneNum: true,
+		},
+	  });
+  
+	  if (!user) {
+		return res.status(404).json({ error: "User not found" });
+	  }
+  
+	  res.status(200).json({ user });
+	} catch (error) {
+	  console.error(error);
+	  res.status(500).json({ error: "Lỗi server" });
+	}
+  };
+
+//Update information of useruser
+const updateMe = async (req, res) => {
+	try {
+	  const userID = req.userID;
+	  const { firstName, lastName, phoneNum, email } = req.body;
+	  const existingUser = await prisma.user.findUnique({
+		where: { userID },
+	  });
+	  if (!existingUser) {
+		return res.status(404).json({ error: "User not found" });
+	  }
+	  const updatedUser = await prisma.user.update({
+		where: { userID },
+		data: {
+		  firstName,
+		  lastName,
+		  phoneNum,
+		  email,
+		},
+		select: {
+		  userName: true,
+		  email: true,
+		  firstName: true,
+		  lastName: true,
+		  phoneNum: true,
+		},
+	  });
+  
+	  res.status(200).json({
+		message: "Cập nhật thông tin cá nhân thành công!",
+		user: updatedUser,
+	  });
+	} catch (error) {
+	  console.error(error);
+	  res.status(500).json({ error: "Lỗi server", detail: error.message });
+	}
+  };
+
 module.exports = {
 	loginUser,
 	signupUser,
+	getMe,
+	updateMe
 };
+
+
+
