@@ -5,7 +5,7 @@ const {
 	createWarning,
 	deleteWarning,
 } = require("../controllers/warningControllers");
-
+const { requireAuth } = require("../middleware/middleware")
 // Setup Swagger
 
 /**
@@ -157,7 +157,7 @@ const {
  *                   example: "Delete warning failed"
  */
 // Lấy hết warning
-router.get("/getAll", getAllWarnings);
+router.get("/getAll", requireAuth, getAllWarnings);
 // Tạo warning mới
 router.post("/createWarning", createWarning);
 // Xóa warning

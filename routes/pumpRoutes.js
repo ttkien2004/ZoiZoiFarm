@@ -1,5 +1,6 @@
 const express = require('express');
 const { addPump, setPumpSchedule , getPumpAdafruitState, setPumpAdafruitState} = require('../controllers/pumpControllers');
+const {requireAuth} = require("../middleware/middleware")
 
 const router = express.Router();
 
@@ -34,9 +35,6 @@ const router = express.Router();
  *                 type: string
  *                 enum: [on, off, auto]
  *                 example: "auto"
- *               userID:
- *                 type: integer
- *                 example: 1
  *     responses:
  *       201:
  *         description: Successfully added pump
@@ -57,7 +55,7 @@ const router = express.Router();
  *         description: Internal server error
  */
 
-router.post("/", addPump);
+router.post("/", requireAuth, addPump);
 
 // /**
 //  * @swagger
@@ -85,11 +83,8 @@ router.post("/", addPump);
 //  *                 type: string
 //  *                 enum: [on, off, auto]
 //  *                 example: "on"
-//  *               userID:
-//  *                 type: integer
-//  *                 example: 1
 //  *     responses:
-//  *       2000:
+//  *       200:
 //  *         description: Successfully updated pump state
 //  *         content:
 //  *           application/json:
@@ -146,9 +141,6 @@ router.post("/", addPump);
  *               schedule:
  *                 type: string
  *                 example: "06:00, 18:00"
- *               userID:
- *                 type: integer
- *                 example: 1
  *     responses:
  *       200:
  *         description: Successfully updated pump schedule
@@ -277,9 +269,6 @@ router.get('/:pumpID/adafruit/state', getPumpAdafruitState);
  *                 type: string
  *                 enum: [on, off, auto]
  *                 example: "on"
- *               userID:
- *                 type: integer
- *                 example: 1
  *     responses:
  *       200:
  *         description: Đã cập nhật máy bơm sang trạng thái mới
