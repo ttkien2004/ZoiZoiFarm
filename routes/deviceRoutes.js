@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { getAllDevices, updateDeviceStatus, deleteDevice, getDeviceState } = require('../controllers/deviceControllers');
+const { requireAuth } = require('../middleware/middleware');
 
 /**
  * @swagger
@@ -40,7 +41,7 @@ const { getAllDevices, updateDeviceStatus, deleteDevice, getDeviceState } = requ
  *       500:
  *         description: Internal server error
  */
-router.get('/', getAllDevices);
+router.get('/', requireAuth, getAllDevices);
 
 /**
  * @swagger
@@ -68,9 +69,6 @@ router.get('/', getAllDevices);
  *                 type: string
  *                 enum: [able, disable]
  *                 example: "disable"
- *               userID:
- *                 type: integer
- *                 example: 1
  *     responses:
  *       200:
  *         description: Cập nhật thành công
@@ -95,17 +93,6 @@ router.put("/:deviceID/status", updateDeviceStatus);
  *         schema:
  *           type: integer
  *         description: ID của thiết bị cần xóa
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required: [userID]
- *             properties:
- *               userID:
- *                 type: integer
- *                 example: 1
  *     responses:
  *       200:
  *         description: Xóa thiết bị thành công và cập nhật số lượng
@@ -157,6 +144,6 @@ router.delete("/:deviceID", deleteDevice);
  *       500:
  *         description: Lỗi server
  */
-router.get("/:deviceID/state", getDeviceState);
+router.get("/:deviceID/status", getDeviceState);
 
 module.exports = router;

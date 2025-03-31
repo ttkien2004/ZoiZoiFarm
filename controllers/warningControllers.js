@@ -1,64 +1,48 @@
-const { PrismaClient } = require("@prisma/client");
-// const { toInt } = require("validator");
-const prisma = new PrismaClient();
-
-// Lấy hết warnings
-const getAllWarnings = async (req, res) => {
+const { getAllWarningsService, createWarningService, deleteWarningService
+  } = require("../services/warningService");
+  
+//Get all warning of a user
+  exports.getAllWarnings = async (req, res) => {
 	try {
-		const warnings = await prisma.warning.findMany();
-		console.log(warnings);
-		if (warnings) {
-			return res
-				.status(200)
-				.json({ msg: "get all warnings successfully", data: warnings });
-		}
+	  const userID = req.userID; 
+	  const warnings = await getAllWarningsService(userID);
+	  return res.status(200).json({
+		msg: "Get all warnings successfully",
+		data: warnings
+	  });
 	} catch (err) {
-		res.status(400).json({ msg: "get warnings failed" });
+	  console.error(err);
+	  return res.status(400).json({ msg: "Get warnings failed" });
 	}
-};
-// Tạo warning
-const createWarning = async (req, res) => {
+  };
+  
+//Create a new warning
+  exports.createWarning = async (req, res) => {
 	const { message, sensorID, date } = req.body;
-	console.log(message, sensorID, date);
-	const parsedDate = new Date(date);
 	try {
-		const newWarning = await prisma.warning.create({
-			data: {
-				sensorID: sensorID,
-				message: message,
-				timeWarning: parsedDate,
-			},
-		});
-		if (newWarning) {
-			res
-				.status(201)
-				.json({ msg: "Create warning successfully", data: newWarning });
-		}
+	  const newWarning = await createWarningService({ message, sensorID, date });
+	  res.status(201).json({
+		msg: "Create warning successfully",
+		data: newWarning
+	  });
 	} catch (err) {
-		console.log(err.message);
-		res.status(400).json({ msg: "create warning failed", error: err.message });
+	  console.error(err.message);
+	  res.status(400).json({ msg: "Create warning failed", error: err.message });
 	}
-};
-// Xóa warning
-const deleteWarning = async (req, res) => {
-	const { warningId } = req.query;
-	console.log(req.query);
-	const warningIdParsed = Number(warningId);
+  };
+  
+//Delete a warning
+  exports.deleteWarning = async (req, res) => {
 	try {
-		const delWarning = await prisma.warning.delete({
-			where: {
-				warningID: warningIdParsed,
-			},
-		});
-		if (delWarning) {
-			res.status(200).json({ msg: "Delete warning successfully" });
-		}
+	  // Lấy warningId từ query
+	  const { warningId } = req.query;
+	  const delWarning = await deleteWarningService(warningId);
+	  if (delWarning) {
+		return res.status(200).json({ msg: "Delete warning successfully" });
+	  }
 	} catch (err) {
-		res.status(400).json({ msg: "delete warning failed" });
+	  console.error(err);
+	  res.status(400).json({ msg: "Delete warning failed" });
 	}
-};
-module.exports = {
-	getAllWarnings,
-	createWarning,
-	deleteWarning,
-};
+  };
+  

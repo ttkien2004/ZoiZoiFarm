@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { addSensor, getSensors, updateSensorStatus, updateAlertThreshold, deleteSensor , getSensorData} = require("../controllers/sensorControllers");
-
+const {requireAuth} = require("../middleware/middleware")
 /**
  * @swagger
  * /api/sensor:
@@ -30,9 +30,6 @@ const { addSensor, getSensors, updateSensorStatus, updateAlertThreshold, deleteS
  *                 type: string
  *                 enum: ["able", "disable"]
  *                 example: "able"
- *               userID:
- *                 type: integer
- *                 example: 1
  *     responses:
  *       201:
  *         description: Cảm biến đã được thêm thành công
@@ -54,7 +51,7 @@ const { addSensor, getSensors, updateSensorStatus, updateAlertThreshold, deleteS
  *       500:
  *         description: Lỗi server
  */
-router.post("/", addSensor);
+router.post("/", requireAuth, addSensor);
 
 /**
  * @swagger
@@ -104,7 +101,7 @@ router.post("/", addSensor);
  *       500:
  *         description: Internal server error
  */
-router.get('/', getSensors);
+router.get('/', requireAuth, getSensors);
 
 /**
  * @swagger
@@ -132,9 +129,6 @@ router.get('/', getSensors);
  *                 type: string
  *                 enum: [able, disable]
  *                 example: "able"
- *               userID:
- *                 type: integer
- *                 example: 1
  *     responses:
  *       200:
  *         description: Successfully updated sensor status
@@ -182,9 +176,6 @@ router.put('/:sensorID/status', updateSensorStatus);
  *               alertThreshold:
  *                 type: number
  *                 example: 35.5
- *               userID:
- *                 type: integer
- *                 example: 1
  *     responses:
  *       200:
  *         description: Cập nhật alertThreshold thành công
@@ -211,17 +202,6 @@ router.put('/:sensorID/alertThreshold', updateAlertThreshold);
  *         schema:
  *           type: integer
  *         description: ID của cảm biến cần xóa
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required: [userID]
- *             properties:
- *               userID:
- *                 type: integer
- *                 example: 1
  *     responses:
  *       200:
  *         description: Xóa cảm biến thành công

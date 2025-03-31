@@ -1,6 +1,7 @@
 const express = require('express');
 const { toggleLedState, addLight, getLightStatus, setLedAdafruitState, getLedAdafruitState } = require('../controllers/lightControllers');
 const router = express.Router();
+const {requireAuth} = require("../middleware/middleware")
 
 /**
  * @swagger
@@ -28,9 +29,6 @@ const router = express.Router();
  *                 type: string
  *                 enum: [on, off]
  *                 example: "off"
- *               userID:
- *                 type: integer
- *                 example: 1
  *     responses:
  *       201:
  *         description: Successfully added LED light and logged in controls.
@@ -40,7 +38,7 @@ const router = express.Router();
  *         description: Internal server error.
  */
 
-router.post("/", addLight);
+router.post("/", requireAuth, addLight);
 
 // /**
 //  * @swagger
@@ -68,9 +66,6 @@ router.post("/", addLight);
 //  *                 type: string
 //  *                 enum: [on, off]
 //  *                 example: "on"
-//  *               userID:
-//  *                 type: integer
-//  *                 example: 1
 //  *     responses:
 //  *       200:
 //  *         description: Successfully updated LED light state
