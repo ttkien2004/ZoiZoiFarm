@@ -155,9 +155,6 @@ router.post("/", requireAuth, addLight);
  *                 type: string
  *                 enum: [on, off]
  *                 example: "on"
- *               userID:
- *                 type: integer
- *                 example: 1
  *     responses:
  *       200:
  *         description: Đã cập nhật đèn LED sang trạng thái mới
