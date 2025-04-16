@@ -1,5 +1,5 @@
 const express = require('express');
-const { addPump, setPumpSchedule , getPumpAdafruitState, setPumpAdafruitState} = require('../controllers/pumpControllers');
+const { addPump, setPumpSchedule , getPumpAdafruitState, setPumpAdafruitState , updatePumpAutoLevel} = require('../controllers/pumpControllers');
 const {requireAuth} = require("../middleware/middleware")
 
 const router = express.Router();
@@ -280,5 +280,38 @@ router.get('/:pumpID/adafruit/state', getPumpAdafruitState);
  *         description: Lỗi server
  */
 router.put('/:pumpID/adafruit/state', setPumpAdafruitState);
+
+/**
+ * @swagger
+ * /api/pump/{pumpID}/autoLevel:
+ *   put:
+ *     summary: Update autoLevel status of the pump
+ *     tags: ["Pump"]
+ *     parameters:
+ *       - in: path
+ *         name: pumpID
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID máy bơm
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               autoLevel:
+ *                 type: boolean
+ *                 example: "true"
+ *     responses:
+ *       200:
+ *         description: Cập nhật trạng thái autoLevel thành công
+ *       404:
+ *         description: Không tìm thấy máy bơm
+ *       500:
+ *         description: Lỗi server
+ */
+router.put("/:pumpID/autoLevel", updatePumpAutoLevel);
 
 module.exports = router;

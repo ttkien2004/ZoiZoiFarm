@@ -164,3 +164,26 @@ exports.setPumpAdafruitStateService = async ({ pumpID, state }) => {
     pump: updatedPump,
   };
 };
+
+exports.updatePumpAutoLevelService = async (pumpID, autoLevel) => {
+  const pump = await prisma.pump.findUnique({
+    where: { pumpID: parseInt(pumpID) },
+  });
+
+  if (!pump) {
+    throw new Error("Không tìm thấy máy bơm");
+  }
+
+  const updatedPump = await prisma.pump.update({
+    where: { pumpID: parseInt(pumpID) },
+    data: { autoLevel: autoLevel },
+  });
+
+  console.log("Cập nhật xong:", updatedPump);
+
+  return {
+    pumpID: updatedPump.pumpID,
+    autoLevel: updatedPump.autoLevel,
+    message: "Cập nhật autoLevel thành công!",
+  };
+};

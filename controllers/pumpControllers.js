@@ -1,4 +1,4 @@
-const { createPumpService, setPumpScheduleService, getPumpAdafruitStateService, setPumpAdafruitStateService } = require("../services/pumpService");
+const { createPumpService, setPumpScheduleService, getPumpAdafruitStateService, setPumpAdafruitStateService , updatePumpAutoLevelService} = require("../services/pumpService");
 
 //Add a new pump
 exports.addPump = async (req, res) => {
@@ -91,3 +91,23 @@ exports.setPumpAdafruitState = async (req, res) => {
     return res.status(500).json({ error: 'Không thể đặt trạng thái máy bơm.' });
   }
 };
+
+exports.updatePumpAutoLevel = async (req, res) => {
+  const { pumpID } = req.params;
+  let { autoLevel } = req.body;
+
+  if (typeof autoLevel === "string") {
+    autoLevel = autoLevel.toLowerCase() === "true";
+  }
+
+  try {
+    const result = await updatePumpAutoLevelService(pumpID, autoLevel);
+    res.status(200).json(result);
+  } catch (error) {
+    if (error.message === "Không tìm thấy máy bơm") {
+      return res.status(404).json({ error: error.message });
+    }
+    console.error("Lỗi cập nhật autoLevel:", error);
+    res.status(500).json({ error: "Lỗi server khi cập nhật autoLevel." });
+  }
+}
