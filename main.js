@@ -12,6 +12,7 @@ const deviceRoutes = require("./routes/deviceRoutes");
 const sensorRoutes = require("./routes/sensorRoutes");
 const warningRoutes = require("./routes/warningRoutes");
 const adafruitRoutes = require("./routes/adafruitRoutes");
+const historyRoutes = require("./routes/historyRoutes");
 const scheduler = require("./controllers/scheduler");
 const axiosClient = require("./axiosConfig/axiosConfig");
 // const swaggerSpec = swaggerJsdoc(swaggerOptions);
@@ -106,6 +107,9 @@ app.use("/api/warning", warningRoutes);
 
 // For get data from adafruit
 app.use("/api/adafruit", adafruitRoutes);
+
+// For history
+app.use("/api/history", historyRoutes);
 
 
 // // Just using for testing, I will modify it soon
