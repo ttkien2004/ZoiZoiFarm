@@ -35,6 +35,9 @@ const { requireAuth } = require('../middleware/middleware');
  *                       status:  
  *                         type: string
  *                         example: able
+ *                       state:
+ *                         type: string
+ *                         example: on
  *                       type:
  *                         type: string
  *                         example: pump
