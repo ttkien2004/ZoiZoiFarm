@@ -20,6 +20,8 @@ async function getAllDevicesService(userID) {
     quantity: device.quantity,
     status: device.status,
     state: device.pump ? device.pump.state : device.led_light ? device.led_light.state : null,
+    autoLevel: device.pump ? device.pump.autoLevel : null,
+    schedule: device.pump ? device.pump.schedule : null,
     type: device.pump ? "pump" : device.led_light ? "led_light" : "unknown"
   }));
 
