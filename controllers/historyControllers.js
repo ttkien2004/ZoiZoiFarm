@@ -5,13 +5,14 @@ exports.getUserControlHistory = async (req, res) => {
   const userID = req.userID;
 
   try {
-    const { user, controlsHistory } = await getUserControlHistoryService(userID);
+    const { user, timeline } = await getUserControlHistoryService(userID);
     res.status(200).json({
       user: {
         userID: user.userID,
         userName: user.userName,
       },
-      controlsHistory,
+      timeline,
+      // controlWarning,
     });
   } catch (error) {
     if (error.message === "USER_NOT_FOUND") {

@@ -4,7 +4,11 @@ const axiosClient = require('../axiosConfig/axiosConfig');
 
 // Get data from feed TEMP, sensorID=1
 exports.fetchAndStoreTempDataService = async () => {
-  const response = await axiosClient.get('/temp/data?limit=1');
+  let get_sensor_type = "";
+  if (sensor.type === "Temperature & Humidity Sensor") {
+    get_sensor_type = "temp"
+  }
+  const response = await axiosClient.get(`/${get_sensor_type}/data?limit=1`);
   const feedData = response.data;
   for (const record of feedData) {
     const value = parseFloat(record.value);
@@ -12,7 +16,7 @@ exports.fetchAndStoreTempDataService = async () => {
 
     await prisma.data.create({
       data: {
-        sensorID: 1, // Temperature & Humidity Sensor
+        // sensorID: 1, // Temperature & Humidity Sensor
         dataTime,
         value,
       },
