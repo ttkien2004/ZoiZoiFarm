@@ -16,7 +16,7 @@ exports.fetchAndStoreTempDataService = async () => {
 
     await prisma.data.create({
       data: {
-        // sensorID: 1, // Temperature & Humidity Sensor
+        sensorID: 1, // Temperature & Humidity Sensor
         dataTime,
         value,
       },
