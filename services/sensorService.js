@@ -2,7 +2,7 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 exports.createSensorService = async ({ sensorName, type, alertThreshold, status, userID }) => {
-  const validSensorTypes = ["Soil Moisture Sensor", "Temperature & Humidity Sensor", "Light Sensor"];
+  const validSensorTypes = ["Soil Moisture Sensor", "Temperature Sensor" , "Humidity Sensor", "Light Sensor"];
   if (!validSensorTypes.includes(type)) {
     throw new Error("Loại cảm biến không hợp lệ!");
   }
