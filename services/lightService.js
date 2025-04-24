@@ -73,7 +73,8 @@ exports.toggleLedStateService = async ({ lightID, state }) => {
 // Get light state
 exports.getLightStatusService = async (lightID) => {
   const light = await prisma.led_light.findUnique({
-    where: { lightID: parseInt(lightID) },
+    // where: { lightID: parseInt(lightID) },
+    where: {lightID: 1},
     include: { device: true },
   });
   return light;

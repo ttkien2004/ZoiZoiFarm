@@ -124,7 +124,8 @@ exports.getPumpAdafruitStateService = async (pumpID) => {
 //Set state for a pump
 exports.setPumpAdafruitStateService = async ({ pumpID, state }) => {
   const pump = await prisma.pump.findUnique({
-    where: { pumpID: parseInt(pumpID) },
+    // where: { pumpID: parseInt(pumpID) },
+    where: { pumpID: 1 },
     include: { device: true },
   });
   if (!pump) {
